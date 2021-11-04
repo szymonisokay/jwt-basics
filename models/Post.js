@@ -19,10 +19,12 @@ const postSchema = mongoose.Schema({
     },
     likes: {
         usersId: {
-            type: [String]
+            type: [String],
+            default: []
         },
         numberOfLikes: {
-            type: Number
+            type: Number,
+            default: 0
         }
     }
 })
