@@ -2,8 +2,7 @@ const Post = require('../models/Post')
 
 const getAllPosts = async (req, res) => {
     try {
-        const { user } = req.body
-        const posts = await Post.find({ createdBy: user })
+        const posts = await Post.find({ createdBy: req.user })
 
         res.status(200).json({ posts })
     } catch (error) {
@@ -14,12 +13,10 @@ const getAllPosts = async (req, res) => {
 
 const createPost = async (req, res) => {
     try {
-        const { user } = req.body
-
         if (!req.body.title || !req.body.content)
             return res.status(400).json({ msg: 'Title and content must be provided' })
 
-        const post = await Post.create({ ...req.body, createdBy: user })
+        const post = await Post.create({ ...req.body, createdBy: req.user })
 
         res.status(200).json({ post })
     } catch (error) {
@@ -31,9 +28,7 @@ const createPost = async (req, res) => {
 const getPost = async (req, res) => {
     try {
         const { id: postID } = req.params
-        const { user } = req.body
-
-        const post = await Post.findOne({ _id: postID, createdBy: user })
+        const post = await Post.findOne({ _id: postID, createdBy: req.user })
 
         if (!post)
             return res.status(404).json({ msg: 'Post not found' })
@@ -49,9 +44,7 @@ const getPost = async (req, res) => {
 const deletePost = async (req, res) => {
     try {
         const { id: postID } = req.params
-        const { user } = req.body
-
-        const post = await Post.findOneAndDelete({ _id: postID, createdBy: user })
+        const post = await Post.findOneAndDelete({ _id: postID, createdBy: req.user })
 
         if (!post)
             return res.status(404).json({ msg: 'Post not found' })
@@ -66,9 +59,8 @@ const deletePost = async (req, res) => {
 const updatePost = async (req, res) => {
     try {
         const { id: postID } = req.params
-        const { user } = req.body
 
-        const post = await Post.findOneandUpdate({ _id: postID, createdBy: user }, { ...req.body }, {
+        const post = await Post.findOneAndUpdate({ _id: postID, createdBy: req.user }, { ...req.body }, {
             returnOriginal: false
         })
 
@@ -81,10 +73,46 @@ const updatePost = async (req, res) => {
     }
 }
 
+const updateLikesAndComments = async (req, res) => {
+    try {
+        const { id: postID } = req.params
+        const currentPost = await Post.findById(postID)
+
+        if (!currentPost)
+            return res.status(404).json({ msg: 'Post not found' })
+
+        if (req.body.liked) {
+            if (!currentPost.likes.usersId.includes(req.user)) {
+                currentPost.likes.usersId.push(req.user)
+
+                currentPost.save()
+
+                res.status(200).json({ msg: 'Post liked', data: currentPost })
+            } else {
+                const filtered = currentPost.likes.usersId.filter(id => id !== req.user)
+                currentPost.likes.usersId = filtered
+
+                currentPost.save()
+
+                res.status(200).json({ msg: 'Post disliked', data: currentPost })
+            }
+        }
+    } catch (error) {
+        res.status(500).json({ error })
+    }
+
+
+
+
+
+
+}
+
 module.exports = {
     getAllPosts,
     createPost,
     getPost,
     deletePost,
-    updatePost
+    updatePost,
+    updateLikesAndComments
 }
