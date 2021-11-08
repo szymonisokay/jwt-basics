@@ -75,12 +75,96 @@ const updatePost = async (req, res) => {
 
 const updateLikesAndComments = async (req, res) => {
     try {
-        const { id: postID } = req.params
-        const currentPost = await Post.findById(postID)
+        const { id } = req.params
+
+        // Liking and disliking comments functionality
+        if (req.body.commentLiked) {
+            const post = await Post.findOne({ 'comments._id': id })
+
+            if (!post)
+                return res.status(404).json({ msg: 'Post not found' })
+
+            const comment = post.comments.find(comment => comment._id.equals(id))
+
+            if (!comment.likes.usersId.includes(req.user)) {
+                comment.likes.usersId.push(req.user)
+
+                post.save()
+
+                return res.status(200).json({ msg: 'Comment liked', data: comment })
+            } else {
+                const filtered = comment.likes.usersId.filter(id => id !== req.user)
+                comment.likes.usersId = filtered
+
+                post.save()
+                return res.status(200).json({ msg: 'Comment disliked', data: comment })
+            }
+        }
+
+        if (req.body.commentEdited) {
+            const editedPost = await Post.findOne({ 'comment._id': id })
+
+            if (!editedPost)
+                res.status(404).json({ msg: 'Post not found' })
+
+            const singleComment = editedPost.comments.find(comment => comment._id.equals(id))
+            console.log(editedPost)
+
+            if (singleComment.createdBy !== req.user) {
+                return res.status(401).json({ msg: "Access denied" })
+            }
+
+
+            res.status(200).json({ msg: 'Comment edited', data: editedPost })
+        }
+
+
+        // Deleting comment functionality
+        if (req.body.commentDeleted) {
+            const post = await Post.findOne({ 'comments._id': id })
+
+            if (!post)
+                return res.status(404).json({ msg: 'Post not found' })
+
+            const singleComment = post.comments.find(comment => comment._id.equals(id))
+
+            if (singleComment.createdBy !== req.user) {
+                return res.status(401).json({ msg: "Access denied" })
+            }
+
+            const filteredComments = post.comments.filter(comment => comment !== singleComment)
+
+            console.log(filteredComments)
+
+            post.comments = filteredComments
+
+            post.save()
+
+            return res.status(200).json({ msg: 'Comment deleted', data: post })
+        }
+
+        const currentPost = await Post.findById(id)
 
         if (!currentPost)
             return res.status(404).json({ msg: 'Post not found' })
 
+        // Commenting posts functionality
+        if (req.body.commentAdded) {
+            const { content } = req.body
+            if (!content)
+                return res.status(200).json({ msg: 'Comment\'s body not provided' })
+
+            const comment = {
+                createdBy: req.user,
+                content,
+            }
+
+            currentPost.comments.push(comment)
+            currentPost.save()
+            return res.status(200).json({ data: currentPost })
+        }
+
+        // Liking posts functionality
         if (req.body.liked) {
             if (!currentPost.likes.usersId.includes(req.user)) {
                 currentPost.likes.usersId.push(req.user)
@@ -96,17 +180,16 @@ const updateLikesAndComments = async (req, res) => {
 
                 res.status(200).json({ msg: 'Post disliked', data: currentPost })
             }
+        } else {
+            res.status(500).json({ msg: 'Error' })
         }
+
+
     } catch (error) {
         res.status(500).json({ error })
     }
-
-
-
-
-
-
 }
+
 
 module.exports = {
     getAllPosts,
@@ -114,5 +197,5 @@ module.exports = {
     getPost,
     deletePost,
     updatePost,
-    updateLikesAndComments
+    updateLikesAndComments,
 }
