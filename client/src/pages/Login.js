@@ -2,9 +2,8 @@ import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Link, useNavigate } from 'react-router-dom'
 // Image
-import { ReactComponent as RegisterImage } from '../images/RegisterImage.svg'
+import { ReactComponent as LoginImage } from '../images/LoginImage.svg'
 // Icons
-import { ReactComponent as PersonIcon } from '../images/PersonIcon.svg'
 import { ReactComponent as EnvelopeIcon } from '../images/EnvelopeIcon.svg'
 import { ReactComponent as KeyIcon } from '../images/KeyIcon.svg'
 import { ReactComponent as EyeHideIcon } from '../images/EyeHideIcon.svg'
@@ -136,47 +135,38 @@ const Paragraph = styled.p`
   margin-top: 1rem;
 `
 
-const Register = () => {
+const Login = () => {
     const [isInfo, setIsInfo] = useState(false)
     const [infoText, setInfoText] = useState([])
     const [infoColor, setInfoColor] = useState('#AF0000')
     const [isLoading, setIsLoading] = useState(false)
     const [isPasswordShowed, setIsPasswordShowed] = useState(false)
 
-    const usernameRef = useRef()
     const emailRef = useRef()
     const passRef = useRef()
-    const confirmPassRef = useRef()
 
     const navigate = useNavigate()
 
     const handleSubmit = (e) => {
         e.preventDefault()
 
-        const username = usernameRef.current.value
         const email = emailRef.current.value
         const password = passRef.current.value
-        const confirmPassword = confirmPassRef.current.value
 
         setIsInfo(false)
         setInfoText([])
         setIsLoading(false)
 
-        if (!username || !email || !password || !confirmPassword) {
+        if (!email || !password) {
             setInfoColor('#AF0000')
             setInfoText(oldState => [...oldState, 'One of the fields is empty!'])
-            setIsInfo(true)
-        } else if (password !== confirmPassword) {
-            setInfoColor('#AF0000')
-            setInfoText(oldState => [...oldState, 'Passwords do not match!'])
             setIsInfo(true)
         } else {
             setIsLoading(true)
             axios({
                 method: 'post',
-                url: 'http://localhost:3000/api/auth/register',
+                url: 'http://localhost:3000/api/auth/login',
                 data: {
-                    username,
                     email,
                     password
                 },
@@ -193,7 +183,7 @@ const Register = () => {
                         token: `Bearer ${res.data.user.token}`
                     }))
 
-                    setTimeout(() => navigate('/auth/sign-in', { replace: true }), 1000)
+                    setTimeout(() => navigate('/', { replace: true }), 1000)
 
                 })
                 .catch((err) => {
@@ -242,17 +232,13 @@ const Register = () => {
             </Header>
             <Container>
                 <ImageContainer>
-                    <RegisterImage className="register-image" />
+                    <LoginImage className="register-image" />
                 </ImageContainer>
                 <FormContainer>
                     <TextContainer>
-                        <Title>Create an account</Title>
-                        <Subtitle>And jump into the world of posts.</Subtitle>
+                        <Title>Log into your account</Title>
+                        <Subtitle>And start sharing and creating posts.</Subtitle>
                         <Form onSubmit={handleSubmit}>
-                            <InputContainer>
-                                <PersonIcon className="input-icon" />
-                                <Input placeholder="Username" ref={usernameRef}></Input>
-                            </InputContainer>
                             <InputContainer>
                                 <EnvelopeIcon className="input-icon" />
                                 <Input placeholder="Email" ref={emailRef}></Input>
@@ -262,14 +248,10 @@ const Register = () => {
                                 <Input type="password" placeholder="Password" ref={passRef}></Input>
                                 {isPasswordShowed ? <EyeShowIcon className="password-icon" onClick={showPassword} /> : <EyeHideIcon className="password-icon" onClick={showPassword} />}
                             </InputContainer>
-                            <InputContainer>
-                                <KeyIcon className="input-icon" />
-                                <Input type="password" placeholder="Confirm password" ref={confirmPassRef}></Input>
-                            </InputContainer>
                             {isInfo && <Info text={infoText} color={infoColor} />}
-                            <Button>{isLoading ? 'Loading...' : 'Register'}</Button>
+                            <Button>{isLoading ? 'Loading...' : 'Login'}</Button>
                         </Form>
-                        <Paragraph>Already have an account? <Link to="/auth/sign-in" className="link">Sign In</Link></Paragraph>
+                        <Paragraph>Don't have an account? <Link to="/auth/sign-up" className="link">Sign Up</Link></Paragraph>
                     </TextContainer>
                 </FormContainer>
             </Container>
@@ -280,4 +262,4 @@ const Register = () => {
 
 
 
-export default Register
+export default Login

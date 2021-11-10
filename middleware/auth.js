@@ -6,6 +6,7 @@ const authMiddleware = (req, res, next) => {
         res.status(401).json({ msg: 'Authentication failed' })
 
     const token = authHeader.split(' ')[1]
+
     const { id } = jwt.verify(token, process.env.SECRET)
 
     req.user = id
