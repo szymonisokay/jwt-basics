@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
 // Logo
 import { ReactComponent as Logo } from '../images/Logo.svg'
 import UserInfo from './UserInfo';
+// Context
+import { useAuthContext } from '../context/authContext'
 
 
 const HeaderMain = styled.header`
@@ -65,6 +67,8 @@ const UserContainer = styled.div`
 `
 
 const Header = () => {
+    const { isAuthenticated } = useAuthContext()
+
     return (
         <HeaderMain>
             <HeaderContainer>
@@ -80,8 +84,8 @@ const Header = () => {
                     </NavItem>
                 </NavContainer>
                 <UserContainer>
-                    <UserInfo />
-                    <Link to="/auth/sign-in">Log in</Link>
+                    {isAuthenticated && <UserInfo />}
+                    {isAuthenticated ? <Link to="/auth/sign-out">Log out</Link> : <Link to="/auth/sign-in">Log in</Link>}
                 </UserContainer>
             </HeaderContainer>
         </HeaderMain >

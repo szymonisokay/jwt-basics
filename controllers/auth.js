@@ -17,7 +17,7 @@ const Register = async (req, res) => {
         const token = jwt.sign({ id: user._id, username }, process.env.SECRET, { expiresIn: '1d' })
         res.status(201).json({ msg: 'User created successfully!', user: { token, username } })
     } catch (error) {
-        return res.status(500).json({ msg: error })
+        res.status(500).json({ msg: error || 'Something went wrong. Try again later.' })
     }
 }
 
@@ -36,10 +36,10 @@ const Login = async (req, res) => {
             return res.status(401).json({ msg: 'Wrong password!' })
 
         const token = jwt.sign({ id: user._id, username: user.username }, process.env.SECRET, { expiresIn: '1d' })
-        res.status(200).json({ msg: 'Logged in succesfully', user: { token, username: user.username } })
+        res.status(200).json({ msg: 'Logged in successfully', user: { token, username: user.username } })
 
     } catch (error) {
-        res.status(500).json({ msg: error })
+        res.status(500).json({ msg: error || 'Something went wrong. Try again later.' })
     }
 }
 

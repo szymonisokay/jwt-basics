@@ -8,10 +8,10 @@ import { ReactComponent as EnvelopeIcon } from '../images/EnvelopeIcon.svg'
 import { ReactComponent as KeyIcon } from '../images/KeyIcon.svg'
 import { ReactComponent as EyeHideIcon } from '../images/EyeHideIcon.svg'
 import { ReactComponent as EyeShowIcon } from '../images/EyeShowIcon.svg'
-// Logo
-import { ReactComponent as Logo } from '../images/Logo.svg'
 // Components
 import Info from '../components/Info';
+// Context
+import { useAuthContext } from '../context/authContext'
 
 // axios
 const axios = require('axios').default
@@ -20,14 +20,6 @@ const Background = styled.section`
     width: 100%;
     height: 100vh;
     background: #BFFFE5;
-`
-
-const Header = styled.div`
-    width: 100%;
-    height: 100px;
-    position: absolute;
-    top: 0;
-    left: 0;
 `
 
 const Container = styled.div`
@@ -136,72 +128,72 @@ const Paragraph = styled.p`
 `
 
 const Login = () => {
-    const [isInfo, setIsInfo] = useState(false)
-    const [infoText, setInfoText] = useState([])
-    const [infoColor, setInfoColor] = useState('#AF0000')
-    const [isLoading, setIsLoading] = useState(false)
-    const [isPasswordShowed, setIsPasswordShowed] = useState(false)
+    const { setIsAuthenticated } = useAuthContext()
 
-    const emailRef = useRef()
-    const passRef = useRef()
+    const [isInfo, setIsInfo] = useState(false),
+        [infoText, setInfoText] = useState([]),
+        [infoColor, setInfoColor] = useState('#AF0000'),
+        [isLoading, setIsLoading] = useState(false),
+        [isPasswordShowed, setIsPasswordShowed] = useState(false)
+
+    const emailRef = useRef(),
+        passRef = useRef()
 
     const navigate = useNavigate()
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
 
-        const email = emailRef.current.value
-        const password = passRef.current.value
+        const email = emailRef.current.value,
+            password = passRef.current.value
 
         setIsInfo(false)
         setInfoText([])
-        setIsLoading(false)
+        setIsLoading(true)
 
         if (!email || !password) {
-            setInfoColor('#AF0000')
-            setInfoText(oldState => [...oldState, 'One of the fields is empty!'])
-            setIsInfo(true)
-        } else {
-            setIsLoading(true)
-            axios({
-                method: 'post',
-                url: 'http://localhost:3000/api/auth/login',
-                data: {
-                    email,
-                    password
-                },
+            return showInfo('One of the fields is empty!', '#AF0000')
 
-            })
-                .then((res) => {
-                    setIsLoading(false)
-                    setIsInfo(true)
-                    setInfoColor('#307452')
-                    setInfoText(oldState => [...oldState, res.data.msg])
-
-                    localStorage.setItem("user", JSON.stringify({
-                        username: res.data.user.username,
-                        token: `Bearer ${res.data.user.token}`
-                    }))
-
-                    setTimeout(() => navigate('/', { replace: true }), 1000)
-
-                })
-                .catch((err) => {
-                    setIsLoading(false)
-                    setIsInfo(true)
-                    setInfoColor('#AF0000')
-                    const error = err.response.data.msg.errors
-                    if (error) {
-                        for (const property in error) {
-                            setInfoText(oldState => [...oldState, `${property}: ${error[property].message}`.split(": ")[1]]);
-                        }
-                    } else {
-                        setInfoText(oldState => [...oldState, err.response.data.msg])
-                    }
-
-                })
         }
 
+        await axios({
+            method: 'post',
+            url: 'http://localhost:3000/api/auth/login',
+            data: {
+                email,
+                password
+            },
+
+        }).then((res) => {
+            showInfo(res.data.msg, '#307452')
+
+            localStorage.setItem("user", JSON.stringify({
+                username: res.data.user.username,
+                token: `Bearer ${res.data.user.token}`
+            }))
+
+            setIsAuthenticated(true)
+            setTimeout(() => navigate('/', { replace: true }), 1000)
+
+        }).catch((err) => {
+            const error = err.response.data.msg.errors
+
+            if (error) {
+                let errors = []
+                for (const property in error) {
+                    errors = [...errors, `${property}: ${error[property].message}`.split(": ")[1]]
+                }
+                return showInfo(errors, '#AF0000')
+            }
+            showInfo(err.response.data.msg, '#AF0000')
+        })
+    }
+
+    const showInfo = (infoText, color) => {
+        setIsInfo(true)
+        setInfoText(oldState => [...oldState, infoText])
+        setInfoColor(color)
+        setIsLoading(false)
     }
 
     if (isInfo) {
@@ -210,12 +202,14 @@ const Login = () => {
 
     const showPassword = (e) => {
         e.preventDefault()
-        setIsPasswordShowed(!isPasswordShowed)
-        if (isPasswordShowed)
-            passRef.current.type = 'text'
-        else
-            passRef.current.type = 'password'
+        setIsPasswordShowed(true)
+        passRef.current.type = 'text'
+    }
 
+    const hidePassword = (e) => {
+        e.preventDefault()
+        setIsPasswordShowed(false)
+        passRef.current.type = 'password'
     }
 
     useEffect(() => {
@@ -225,11 +219,6 @@ const Login = () => {
 
     return (
         <Background>
-            <Header>
-                <Container>
-                    <Logo className="logo" />
-                </Container>
-            </Header>
             <Container>
                 <ImageContainer>
                     <LoginImage className="register-image" />
@@ -246,7 +235,7 @@ const Login = () => {
                             <InputContainer>
                                 <KeyIcon className="input-icon" />
                                 <Input type="password" placeholder="Password" ref={passRef}></Input>
-                                {isPasswordShowed ? <EyeShowIcon className="password-icon" onClick={showPassword} /> : <EyeHideIcon className="password-icon" onClick={showPassword} />}
+                                {isPasswordShowed ? <EyeHideIcon className="password-icon" onClick={hidePassword} /> : <EyeShowIcon className="password-icon" onClick={showPassword} />}
                             </InputContainer>
                             {isInfo && <Info text={infoText} color={infoColor} />}
                             <Button>{isLoading ? 'Loading...' : 'Login'}</Button>
