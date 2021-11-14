@@ -136,6 +136,8 @@ const Login = () => {
         [isLoading, setIsLoading] = useState(false),
         [isPasswordShowed, setIsPasswordShowed] = useState(false)
 
+    // let mounted = false
+
     const emailRef = useRef(),
         passRef = useRef()
 
@@ -214,6 +216,7 @@ const Login = () => {
     }
 
     useEffect(() => {
+
         return function cleanUp() {
         };
     }, []);

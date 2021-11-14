@@ -47,7 +47,7 @@ const ShowPosts = ({ title }) => {
                     updatedAt: post.updatedAt
                 }
             })
-
+            console.log(modifiedPosts)
             setPosts([...modifiedPosts])
 
         }).catch(err => {
