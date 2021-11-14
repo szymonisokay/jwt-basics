@@ -98,7 +98,7 @@ const Header = () => {
                         <Link to="/">Your posts</Link>
                     </NavItem>
                     <NavItem>
-                        <Link to="/">Add post</Link>
+                        <Link to="/add-post">Add post</Link>
                     </NavItem>
                 </NavContainer>
                 <UserContainer>

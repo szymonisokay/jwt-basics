@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 // Image
 import { ReactComponent as LoginImage } from '../images/LoginImage.svg'
 // Icons
@@ -122,9 +122,9 @@ const Button = styled.button`
 `
 
 const Paragraph = styled.p`
-  text-align: center;
-  font-size: 0.9rem;
-  margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    margin-top: 1rem;
 `
 
 const Login = () => {
@@ -139,7 +139,8 @@ const Login = () => {
     const emailRef = useRef(),
         passRef = useRef()
 
-    const navigate = useNavigate()
+    const location = useLocation(),
+        navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -173,7 +174,7 @@ const Login = () => {
             }))
 
             setIsAuthenticated(true)
-            setTimeout(() => navigate('/', { replace: true }), 1000)
+            setTimeout(() => navigate(location.state?.pathname || '/', { replace: true }), 1000)
 
         }).catch((err) => {
             const error = err.response.data.msg.errors

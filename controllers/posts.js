@@ -31,7 +31,7 @@ const createPost = async (req, res) => {
 
         const post = await Post.create({ ...req.body, createdBy: req.user })
 
-        res.status(200).json({ post })
+        res.status(200).json({ msg: 'Post created!', post })
     } catch (error) {
         res.status(500).json({ msg: error })
     }

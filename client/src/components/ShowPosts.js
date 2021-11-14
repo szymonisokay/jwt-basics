@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const axios = require('axios')
 
 const PostContainer = styled.div`
-    padding-top: 150px;
+    
 `
 
 const Text = styled.h2`
@@ -40,7 +40,7 @@ const ShowPosts = () => {
     return (
         <PostContainer>
             <Text>All Posts</Text>
-            {posts.length === 0 && <Subtitle>No posts to show...</Subtitle>}
+            {(posts.length === 0 && !isLoading) && <Subtitle>No posts to show...</Subtitle>}
             {isLoading && <Subtitle>Loading...</Subtitle>}
         </PostContainer>
     )
