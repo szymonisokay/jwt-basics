@@ -11,7 +11,8 @@ import { ReactComponent as EyeHideIcon } from '../images/EyeHideIcon.svg'
 import { ReactComponent as EyeShowIcon } from '../images/EyeShowIcon.svg'
 // Components
 import Info from '../components/Info';
-
+// Context
+import { useAuthContext } from '../context/authContext'
 // axios
 const axios = require('axios').default
 
@@ -127,6 +128,8 @@ const Paragraph = styled.p`
 `
 
 const Register = () => {
+    const { setIsAuthenticated } = useAuthContext()
+
     const [isInfo, setIsInfo] = useState(false),
         [infoText, setInfoText] = useState([]),
         [infoColor, setInfoColor] = useState('#AF0000'),
@@ -177,6 +180,7 @@ const Register = () => {
                 token: `Bearer ${res.data.user.token}`
             }))
 
+            setIsAuthenticated(true)
             setTimeout(() => navigate('/', { replace: true }), 1000)
         }).catch((err) => {
             const error = err.response.data.msg.errors

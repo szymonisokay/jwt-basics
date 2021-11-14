@@ -1,8 +1,21 @@
 const Post = require('../models/Post')
+const jwt = require('jsonwebtoken')
 
 const getAllPosts = async (req, res) => {
     try {
-        const posts = await Post.find({ createdBy: req.user })
+        const authHeader = req.headers.authorization
+
+        if (!authHeader) {
+            const posts = await Post.find({})
+            return res.status(200).json({ msg: 'All users posts', posts })
+        }
+
+        const token = authHeader.split(' ')[1]
+
+        const { id } = jwt.verify(token, process.env.SECRET)
+        console.log(id)
+
+        const posts = await Post.find({ createdBy: id })
 
         res.status(200).json({ posts })
     } catch (error) {

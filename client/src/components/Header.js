@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 // Logo
 import { ReactComponent as Logo } from '../images/Logo.svg'
 import UserInfo from './UserInfo';
@@ -66,8 +66,26 @@ const UserContainer = styled.div`
     align-items: center;
 `
 
+const LogOut = styled.span`
+    cursor: pointer;
+    transition: color 0.3s linear;
+
+    &:hover {
+        color: #777;
+    }
+`
+
 const Header = () => {
-    const { isAuthenticated } = useAuthContext()
+    const { isAuthenticated, setIsAuthenticated } = useAuthContext()
+
+    const navigate = useNavigate()
+
+    const logOutUser = (e) => {
+        e.preventDefault()
+        localStorage.removeItem('user')
+        setIsAuthenticated(false)
+        navigate('/auth/sign-in', { replace: true })
+    }
 
     return (
         <HeaderMain>
@@ -85,7 +103,7 @@ const Header = () => {
                 </NavContainer>
                 <UserContainer>
                     {isAuthenticated && <UserInfo />}
-                    {isAuthenticated ? <Link to="/auth/sign-out">Log out</Link> : <Link to="/auth/sign-in">Log in</Link>}
+                    {isAuthenticated ? <LogOut onClick={logOutUser}>Log out</LogOut> : <Link to="/auth/sign-in">Log in</Link>}
                 </UserContainer>
             </HeaderContainer>
         </HeaderMain >

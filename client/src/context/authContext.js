@@ -1,9 +1,13 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 
 const AuthContext = React.createContext()
 
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+    useEffect(() => {
+        localStorage.getItem('user') && setIsAuthenticated(true)
+    }, [setIsAuthenticated])
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
