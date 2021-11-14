@@ -6,7 +6,7 @@ const getAllPosts = async (req, res) => {
         const authHeader = req.headers.authorization
 
         if (!authHeader) {
-            const posts = await Post.find({})
+            const posts = await Post.find({}).sort('-createdAt')
             return res.status(200).json({ msg: 'All users posts', posts })
         }
 
