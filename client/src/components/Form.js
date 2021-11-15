@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components';
 import Info from './Info'
 // axios
@@ -33,6 +33,9 @@ const Form = () => {
     const titleRef = useRef(),
         contentRef = useRef()
 
+    let unmounted = false
+    const source = axios.CancelToken.source()
+
     const getToken = () => {
         const token = JSON.parse(localStorage.getItem('user')).token
         return token
@@ -61,11 +64,14 @@ const Form = () => {
             },
             headers: {
                 "Authorization": token
-            }
+            },
+            cancelToken: source.token
         }).then(res => {
-            return showInfo(res.data.msg, '#307452')
+            if (!unmounted)
+                return showInfo(res.data.msg, '#307452')
         }).catch(err => {
-            return showInfo(err.response.data.msg, '#AF0000')
+            if (!unmounted)
+                return showInfo(err.response.data.msg, '#AF0000')
         })
     }
 
@@ -78,6 +84,14 @@ const Form = () => {
         setInfoColor(color)
         setInfoText(oldInfo => [...oldInfo, text])
     }
+
+    useEffect(() => {
+
+        return function cleanup() {
+            unmounted = true
+            source.cancel("Cancel")
+        }
+    }, [])
 
     return (
         <FormContainer onSubmit={handleSubmit}>
