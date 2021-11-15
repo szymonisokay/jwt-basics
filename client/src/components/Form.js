@@ -33,9 +33,6 @@ const Form = () => {
     const titleRef = useRef(),
         contentRef = useRef()
 
-    let unmounted = false
-    const source = axios.CancelToken.source()
-
     const getToken = () => {
         const token = JSON.parse(localStorage.getItem('user')).token
         return token
@@ -55,24 +52,23 @@ const Form = () => {
 
         const token = getToken()
 
-        await axios({
-            method: 'post',
-            url: 'http://localhost:3000/api/posts',
-            data: {
-                title,
-                content
-            },
-            headers: {
-                "Authorization": token
-            },
-            cancelToken: source.token
-        }).then(res => {
-            if (!unmounted)
-                return showInfo(res.data.msg, '#307452')
-        }).catch(err => {
-            if (!unmounted)
-                return showInfo(err.response.data.msg, '#AF0000')
-        })
+        try {
+            const response = await axios({
+                method: 'post',
+                url: 'http://localhost:3000/api/posts',
+                data: {
+                    title,
+                    content
+                },
+                headers: {
+                    "Authorization": token
+                }
+            })
+
+            return showInfo(response.data.msg, '#307452')
+        } catch (error) {
+            return showInfo(error.response.data.msg, '#AF0000')
+        }
     }
 
     if (isInfo) {
@@ -86,12 +82,10 @@ const Form = () => {
     }
 
     useEffect(() => {
-
         return function cleanup() {
-            unmounted = true
-            source.cancel("Cancel")
+
         }
-    }, [])
+    })
 
     return (
         <FormContainer onSubmit={handleSubmit}>
