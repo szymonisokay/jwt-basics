@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import './App.css'
 import GlobalStyle from './globalStyles';
 import Register from './pages/Register';
@@ -12,7 +12,7 @@ import RequireAuth from './components/RequireAuth';
 
 function App() {
   return (
-    <Router>
+    <>
       <GlobalStyle />
       <Header />
       <Routes>
@@ -28,7 +28,8 @@ function App() {
           </RequireAuth>} />
         <Route path="/users/:id" element={<UserPage />} />
       </Routes>
-    </Router>
+    </>
+
   );
 }
 

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 // Image
 import { ReactComponent as LoginImage } from '../images/LoginImage.svg'
 // Icons
@@ -12,9 +12,6 @@ import { ReactComponent as EyeShowIcon } from '../images/EyeShowIcon.svg'
 import Info from '../components/Info';
 // Context
 import { useAuthContext } from '../context/authContext'
-
-// axios
-const axios = require('axios').default
 
 const Background = styled.section`
     width: 100%;
@@ -128,21 +125,16 @@ const Paragraph = styled.p`
 `
 
 const Login = () => {
-    const { setIsAuthenticated } = useAuthContext()
+    const { signIn } = useAuthContext()
 
     const [isInfo, setIsInfo] = useState(false),
         [infoText, setInfoText] = useState([]),
-        [infoColor, setInfoColor] = useState('#AF0000'),
+        [infoType, setInfoType] = useState(),
         [isLoading, setIsLoading] = useState(false),
         [isPasswordShowed, setIsPasswordShowed] = useState(false)
 
-    // let mounted = false
-
     const emailRef = useRef(),
         passRef = useRef()
-
-    const location = useLocation(),
-        navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -155,47 +147,18 @@ const Login = () => {
         setIsLoading(true)
 
         if (!email || !password) {
-            return showInfo('One of the fields is empty!', '#AF0000')
+            return showInfo('One of the fields is empty!', 'failed')
 
         }
 
-        await axios({
-            method: 'post',
-            url: 'http://localhost:3000/api/auth/login',
-            data: {
-                email,
-                password
-            },
-
-        }).then((res) => {
-            showInfo(res.data.msg, '#307452')
-
-            localStorage.setItem("user", JSON.stringify({
-                username: res.data.user.username,
-                token: `Bearer ${res.data.user.token}`
-            }))
-
-            setIsAuthenticated(true)
-            setTimeout(() => navigate(location.state?.pathname || '/', { replace: true }), 1000)
-
-        }).catch((err) => {
-            const error = err.response.data.msg.errors
-
-            if (error) {
-                let errors = []
-                for (const property in error) {
-                    errors = [...errors, `${property}: ${error[property].message}`.split(": ")[1]]
-                }
-                return showInfo(errors, '#AF0000')
-            }
-            showInfo(err.response.data.msg, '#AF0000')
-        })
+        const { msg, type } = await signIn(email, password)
+        return showInfo(msg, type)
     }
 
-    const showInfo = (infoText, color) => {
+    const showInfo = (infoText, type) => {
         setIsInfo(true)
         setInfoText(oldState => [...oldState, infoText])
-        setInfoColor(color)
+        setInfoType(type)
         setIsLoading(false)
     }
 
@@ -241,7 +204,7 @@ const Login = () => {
                                 <Input type="password" placeholder="Password" ref={passRef}></Input>
                                 {isPasswordShowed ? <EyeHideIcon className="password-icon" onClick={hidePassword} /> : <EyeShowIcon className="password-icon" onClick={showPassword} />}
                             </InputContainer>
-                            {isInfo && <Info text={infoText} color={infoColor} />}
+                            {isInfo && <Info text={infoText} type={infoType} />}
                             <Button>{isLoading ? 'Loading...' : 'Login'}</Button>
                         </Form>
                         <Paragraph>Don't have an account? <Link to="/auth/sign-up" className="link">Sign Up</Link></Paragraph>

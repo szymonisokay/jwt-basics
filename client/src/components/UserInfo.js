@@ -39,7 +39,7 @@ const UserInfo = () => {
             method: 'get',
             url: `http://localhost:3000/api/users/${decodedData.id}`,
             headers: {
-                "Authorization": `${JSON.parse(user).token}`
+                "Authorization": `Bearer ${JSON.parse(user).token}`
             }
         }).then(res => {
             const newUser = {
