@@ -8,6 +8,8 @@ import UserPage from './pages/UserPage';
 import Header from './components/Header';
 import AddPost from './pages/AddPost';
 import RequireAuth from './components/RequireAuth';
+import MyPosts from './pages/MyPosts';
+import EditPost from './pages/EditPost';
 
 
 function App() {
@@ -25,6 +27,14 @@ function App() {
         <Route path="/add-post" element={
           <RequireAuth>
             <AddPost />
+          </RequireAuth>} />
+        <Route path="/my-posts" element={
+          <RequireAuth>
+            <MyPosts />
+          </RequireAuth>} />
+        <Route path="/edit-post/:id" element={
+          <RequireAuth>
+            <EditPost />
           </RequireAuth>} />
         <Route path="/users/:id" element={<UserPage />} />
       </Routes>

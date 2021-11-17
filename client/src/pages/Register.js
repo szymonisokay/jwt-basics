@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 // Image
 import { ReactComponent as RegisterImage } from '../images/RegisterImage.svg'
 // Icons
@@ -13,8 +13,6 @@ import { ReactComponent as EyeShowIcon } from '../images/EyeShowIcon.svg'
 import Info from '../components/Info';
 // Context
 import { useAuthContext } from '../context/authContext'
-// axios
-const axios = require('axios').default
 
 const Background = styled.section`
     width: 100%;
@@ -128,11 +126,11 @@ const Paragraph = styled.p`
 `
 
 const Register = () => {
-    const { setIsAuthenticated } = useAuthContext()
+    const { signUp } = useAuthContext()
 
     const [isInfo, setIsInfo] = useState(false),
         [infoText, setInfoText] = useState([]),
-        [infoColor, setInfoColor] = useState('#AF0000'),
+        [infoType, setInfoType] = useState(),
         [isLoading, setIsLoading] = useState(false),
         [isPasswordShowed, setIsPasswordShowed] = useState(false)
 
@@ -140,8 +138,6 @@ const Register = () => {
         emailRef = useRef(),
         passRef = useRef(),
         confirmPassRef = useRef()
-
-    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -156,50 +152,21 @@ const Register = () => {
         setIsLoading(true)
 
         if (!username || !email || !password || !confirmPassword) {
-            return showInfo('One of the fields is empty!', '#AF0000')
+            return showInfo('One of the fields is empty!', 'failed')
         }
 
         if (password !== confirmPassword) {
-            return showInfo('Passwords do not match!', '#AF0000')
+            return showInfo('Passwords do not match!', 'failed')
         }
 
-        await axios({
-            method: 'post',
-            url: 'http://localhost:3000/api/auth/register',
-            data: {
-                username,
-                email,
-                password
-            },
-
-        }).then((res) => {
-            showInfo(res.data.msg, '#307452')
-
-            localStorage.setItem("user", JSON.stringify({
-                username: res.data.user.username,
-                token: `Bearer ${res.data.user.token}`
-            }))
-
-            setIsAuthenticated(true)
-            setTimeout(() => navigate('/', { replace: true }), 1000)
-        }).catch((err) => {
-            const error = err.response.data.msg.errors
-            if (error) {
-                let errors = []
-                for (const property in error) {
-                    errors = [...errors, `${property}: ${error[property].message}`.split(": ")[1]]
-                }
-                return showInfo(errors, '#AF0000')
-            }
-
-            showInfo(err.response.data.msg, '#AF0000')
-        })
+        const { msg, type } = await signUp(username, email, password)
+        return showInfo(msg, type)
     }
 
-    const showInfo = (infoText, color) => {
+    const showInfo = (infoText, type) => {
         setIsInfo(true)
         setInfoText(oldState => [...oldState, infoText])
-        setInfoColor(color)
+        setInfoType(type)
         setIsLoading(false)
     }
 
@@ -252,7 +219,7 @@ const Register = () => {
                                 <KeyIcon className="input-icon" />
                                 <Input type="password" placeholder="Confirm password" ref={confirmPassRef}></Input>
                             </InputContainer>
-                            {isInfo && <Info text={infoText} color={infoColor} />}
+                            {isInfo && <Info text={infoText} type={infoType} />}
                             <Button>{isLoading ? 'Loading...' : 'Register'}</Button>
                         </Form>
                         <Paragraph>Already have an account? <Link to="/auth/sign-in" className="link">Sign In</Link></Paragraph>

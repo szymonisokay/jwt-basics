@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components';
 // Components
 import SinglePost from './SinglePost';
-// axios
-const axios = require('axios')
+
+import { useAppRequestsContext } from '../context/appRequestsContext'
 
 const PostsContainer = styled.div`   
 `
@@ -24,18 +24,24 @@ const Subtitle = styled.p`
     
 `
 
-const ShowPosts = ({ title }) => {
+const ShowPosts = ({ title, type }) => {
     const [posts, setPosts] = useState([]),
         [isLoading, setIsLoading] = useState(false)
 
-    const fetchAllPosts = async () => {
-        setIsLoading(true)
-        await axios({
-            method: 'get',
-            url: 'http://localhost:3000/api/posts',
-        }).then(res => {
-            setIsLoading(false)
-            const modifiedPosts = res.data.posts.map(post => {
+    const { getAllPosts, getUsersPosts } = useAppRequestsContext()
+
+
+    const fetchAllPosts = useCallback(async () => {
+        try {
+            let response
+            setIsLoading(true)
+            if (type === 'auth')
+                response = await getUsersPosts('posts')
+            else {
+                response = await getAllPosts('posts')
+            }
+
+            const modifiedPosts = response.data.posts.map(post => {
                 return {
                     id: post._id,
                     title: post.title,
@@ -47,17 +53,16 @@ const ShowPosts = ({ title }) => {
                     updatedAt: post.updatedAt
                 }
             })
-            console.log(modifiedPosts)
             setPosts([...modifiedPosts])
-
-        }).catch(err => {
-            console.log(err.response)
-        })
-    }
+            setIsLoading(false)
+        } catch (error) {
+            console.log(error)
+        }
+    }, [getAllPosts, getUsersPosts, type])
 
     useEffect(() => {
         fetchAllPosts()
-    }, [])
+    }, [fetchAllPosts])
 
     return (
         <PostsContainer>

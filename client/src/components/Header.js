@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components';
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 // Logo
 import { ReactComponent as Logo } from '../images/Logo.svg'
 import UserInfo from './UserInfo';
@@ -76,15 +76,15 @@ const LogOut = styled.span`
 `
 
 const Header = () => {
-    const { isAuthenticated, setIsAuthenticated } = useAuthContext()
+    const { isAuthenticated, deleteToken } = useAuthContext()
 
     const navigate = useNavigate()
+    const location = useLocation()
 
     const logOutUser = (e) => {
         e.preventDefault()
-        localStorage.removeItem('user')
-        setIsAuthenticated(false)
-        navigate('/auth/sign-in', { replace: true })
+        deleteToken()
+        navigate('/auth/sign-in', { replace: true, state: location })
     }
 
     return (
@@ -95,7 +95,7 @@ const Header = () => {
                 </Link>
                 <NavContainer>
                     <NavItem>
-                        <Link to="/">Your posts</Link>
+                        <Link to="/my-posts">Your posts</Link>
                     </NavItem>
                     <NavItem>
                         <Link to="/add-post">Add post</Link>

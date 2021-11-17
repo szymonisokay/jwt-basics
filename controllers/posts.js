@@ -13,9 +13,8 @@ const getAllPosts = async (req, res) => {
         const token = authHeader.split(' ')[1]
 
         const { id } = jwt.verify(token, process.env.SECRET)
-        console.log(id)
 
-        const posts = await Post.find({ createdBy: id })
+        const posts = await Post.find({ createdBy: id }).sort('-createdAt')
 
         res.status(200).json({ posts })
     } catch (error) {

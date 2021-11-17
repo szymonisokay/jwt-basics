@@ -8,7 +8,7 @@ const Dashboard = () => {
     return (
         <>
             <Layout>
-                <ShowPosts title='All posts' />
+                <ShowPosts title='All posts' type='no-auth' />
             </Layout>
 
         </>

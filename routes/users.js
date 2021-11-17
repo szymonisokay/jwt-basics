@@ -5,6 +5,6 @@ const authMiddleware = require('../middleware/auth')
 
 const router = express.Router()
 
-router.get('/:id', authMiddleware, getUser)
+router.get('/:id', getUser)
 
 module.exports = router

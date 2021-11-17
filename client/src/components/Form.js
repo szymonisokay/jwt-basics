@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components';
+import { useAppRequestsContext } from '../context/appRequestsContext';
 import Info from './Info'
-// axios
-const axios = require('axios')
+
 
 const FormContainer = styled.form`
     max-width: 500px;
@@ -25,18 +25,17 @@ const Button = styled.button`
     color: white;
 `
 
-const Form = () => {
+const Form = ({ method }) => {
+    const { createPost } = useAppRequestsContext()
+
     const [isInfo, setIsInfo] = useState(false),
-        [infoColor, setInfoColor] = useState(''),
+        [infoType, setInfoType] = useState(''),
         [infoText, setInfoText] = useState([])
 
     const titleRef = useRef(),
         contentRef = useRef()
 
-    const getToken = () => {
-        const token = JSON.parse(localStorage.getItem('user')).token
-        return token
-    }
+
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -50,49 +49,35 @@ const Form = () => {
         if (!title || !content)
             return showInfo('One of the fields is empty!', '#AF0000')
 
-        const token = getToken()
-
         try {
-            const response = await axios({
-                method: 'post',
-                url: 'http://localhost:3000/api/posts',
-                data: {
-                    title,
-                    content
-                },
-                headers: {
-                    "Authorization": token
-                }
-            })
-
-            return showInfo(response.data.msg, '#307452')
+            const response = await createPost('posts', title, content)
+            return showInfo(response.data.msg, 'success')
         } catch (error) {
-            return showInfo(error.response.data.msg, '#AF0000')
+            return showInfo(error.response.data.msg, 'failed')
         }
+
     }
 
     if (isInfo) {
         setTimeout(() => setIsInfo(false), 3000)
     }
 
-    const showInfo = (text, color) => {
+    const showInfo = (text, type) => {
         setIsInfo(true)
-        setInfoColor(color)
+        setInfoType(type)
         setInfoText(oldInfo => [...oldInfo, text])
     }
 
     useEffect(() => {
-        return function cleanup() {
 
-        }
     })
 
     return (
         <FormContainer onSubmit={handleSubmit}>
             <Input className="form-input" placeholder="Title" ref={titleRef} />
             <Textarea className="form-input" rows="10" placeholder="Content" ref={contentRef} />
-            {isInfo && <Info text={infoText} color={infoColor} />}
-            <Button>Add post</Button>
+            {isInfo && <Info text={infoText} type={infoType} />}
+            <Button>{method === 'edit' ? 'Edit post' : 'Add post'}</Button>
         </FormContainer>
     )
 }
