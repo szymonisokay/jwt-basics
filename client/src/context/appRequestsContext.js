@@ -32,6 +32,16 @@ export const AppRequestsProvider = ({ children }) => {
         return response
     }
 
+    const getSinglePost = async (url) => {
+        const response = await axios.get(`${mainUrl}${url}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        return response
+    }
+
     // Post requests
 
     const createPost = async (url, title, content) => {
@@ -56,10 +66,12 @@ export const AppRequestsProvider = ({ children }) => {
                 'Authorization': `Bearer ${token}`
             }
         })
+
+        return response
     }
 
     return (
-        <AppRequestsContext.Provider value={{ getAllPosts, getUsersPosts, getUser, createPost, editPost }} >
+        <AppRequestsContext.Provider value={{ getAllPosts, getUsersPosts, getUser, createPost, editPost, getSinglePost }} >
             {children}
         </AppRequestsContext.Provider>
     )

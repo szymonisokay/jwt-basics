@@ -1,7 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components';
 import { useAppRequestsContext } from '../context/appRequestsContext';
 import Info from './Info'
+import { useParams } from 'react-router-dom'
 
 
 const FormContainer = styled.form`
@@ -26,7 +27,8 @@ const Button = styled.button`
 `
 
 const Form = ({ method }) => {
-    const { createPost } = useAppRequestsContext()
+    const { createPost, getSinglePost, editPost } = useAppRequestsContext()
+    const { id: postID } = useParams()
 
     const [isInfo, setIsInfo] = useState(false),
         [infoType, setInfoType] = useState(''),
@@ -35,7 +37,17 @@ const Form = ({ method }) => {
     const titleRef = useRef(),
         contentRef = useRef()
 
+    const fetchPost = useCallback(async () => {
+        const response = await getSinglePost(`posts/${postID}`)
 
+        setInputData(response.data.post)
+    }, [getSinglePost, postID])
+
+
+    const setInputData = ({ title, content }) => {
+        titleRef.current.value = title
+        contentRef.current.value = content
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -50,11 +62,18 @@ const Form = ({ method }) => {
             return showInfo('One of the fields is empty!', '#AF0000')
 
         try {
-            const response = await createPost('posts', title, content)
+            let response
+            if (method === 'edit')
+                response = await editPost(`posts/${postID}`, title, content)
+            else
+                response = await createPost('posts', title, content)
+
             return showInfo(response.data.msg, 'success')
         } catch (error) {
             return showInfo(error.response.data.msg, 'failed')
         }
+
+        // console.log(title, content)
 
     }
 
@@ -69,8 +88,9 @@ const Form = ({ method }) => {
     }
 
     useEffect(() => {
-
-    })
+        if (method === 'edit')
+            return fetchPost()
+    }, [method, fetchPost])
 
     return (
         <FormContainer onSubmit={handleSubmit}>
