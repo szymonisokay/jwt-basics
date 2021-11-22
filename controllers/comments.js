@@ -1,20 +1,10 @@
 const Comment = require("../models/Comment")
 const Post = require("../models/Post")
 
-const getAllComments = async (req, res) => {
-  try {
-    const comments = await Comment.find({})
-    res.status(200).json({ msg: "All comments", comments })
-  } catch (error) {
-    res.status(500).json({ error: "Something went wrong" })
-  }
-}
-
 const createComment = async (req, res) => {
   try {
     const { id: postID } = req.params
 
-    console.log(req.user)
     const comment = await Comment.create({
       ...req.body,
       createdBy: req.user,
@@ -28,9 +18,54 @@ const createComment = async (req, res) => {
 
     res.status(200).json({ msg: "Comment added", comment, post })
   } catch (error) {
+    res.status(500).json({ error: "Something went wrong" })
+  }
+}
+
+const updateComment = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const comment = await Comment.findOneAndUpdate(
+      { _id: id },
+      { ...req.body },
+      { new: true }
+    )
+
+    if (req.body.liked) {
+      if (!comment.likes.includes(req.user)) {
+        comment.likes.push(req.user)
+        comment.save()
+
+        return res.status(200).json({ msg: "Comment liked", comment })
+      } else {
+        const filteredLikes = comment.likes.filter(
+          (id) => id.toString() !== req.user
+        )
+        comment.likes = filteredLikes
+        comment.save()
+        return res.status(200).json({ msg: "Comment disliked", comment })
+      }
+    }
+
+    res.status(200).json({ msg: "Post updated", comment })
+  } catch (error) {
     console.log(error)
     res.status(500).json({ error: "Something went wrong" })
   }
 }
 
-module.exports = { getAllComments, createComment }
+const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params
+    const comment = await Comment.findOneAndDelete({
+      _id: id,
+      createdBy: req.user,
+    })
+
+    res.status(200).json({ msg: "Comment deleted", comment })
+  } catch (error) {
+    res.status(500).json({ error: "Something went wrong" })
+  }
+}
+module.exports = { createComment, updateComment, deleteComment }

@@ -1,7 +1,5 @@
 const Post = require("../models/Post")
 const Comment = require("../models/Comment")
-const jwt = require("jsonwebtoken")
-const e = require("express")
 
 const getAllPosts = async (req, res) => {
   try {
@@ -10,6 +8,10 @@ const getAllPosts = async (req, res) => {
       const posts = await Post.find({})
         .sort("-createdAt")
         .populate({ path: "createdBy", select: "username image" })
+        .populate({
+          path: "comments",
+          populate: { path: "likes", select: "username image" },
+        })
         .populate({
           path: "comments",
           populate: { path: "createdBy", select: "username image" },
@@ -23,6 +25,10 @@ const getAllPosts = async (req, res) => {
     const posts = await Post.find({ createdBy: req.query.user })
       .sort("-createdAt")
       .populate({ path: "createdBy", select: "username image" })
+      .populate({
+        path: "comments",
+        populate: { path: "likes", select: "username image" },
+      })
       .populate({
         path: "comments",
         populate: { path: "createdBy", select: "username image" },

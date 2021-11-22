@@ -50,11 +50,8 @@ const SinglePost = ({ id, title, content, likes, createdBy, createdAt }) => {
 
   const navigate = useNavigate()
 
-  console.log(createdBy)
-
   const fetchUser = useCallback(async () => {
     const response = await getUser(`users/${createdBy._id}`)
-    console.log(response)
     setUser({ ...response.data.user })
   }, [getUser, createdBy])
 
