@@ -1,15 +1,20 @@
-const express = require('express')
+const express = require("express")
 
-const { getAllPosts, createPost, getPost, deletePost, updatePost, updateLikesAndComments } = require('../controllers/posts')
-const authMiddleware = require('../middleware/auth')
+const {
+  getAllPosts,
+  createPost,
+  getPost,
+  deletePost,
+  updatePost,
+} = require("../controllers/posts")
+const authMiddleware = require("../middleware/auth")
 
 const router = express.Router()
 
-router.get('/', getAllPosts)
-router.post('/', authMiddleware, createPost)
-router.get('/:id', authMiddleware, getPost)
-router.delete('/:id', authMiddleware, deletePost)
-router.put('/:id', authMiddleware, updatePost)
-router.patch('/:id', authMiddleware, updateLikesAndComments)
+router.get("/", getAllPosts)
+router.post("/", authMiddleware, createPost)
+router.get("/:id", getPost)
+router.delete("/:id", authMiddleware, deletePost)
+router.put("/:id", authMiddleware, updatePost)
 
-module.exports = router;
+module.exports = router

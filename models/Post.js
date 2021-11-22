@@ -1,43 +1,36 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 
-const CommentSchema = mongoose.Schema({
-    createdBy: {
-        type: String,
-    },
-    content: {
-        type: String,
-        required: [true, 'Please provide comment\'s content']
-    },
-    likes: {
-        usersId: {
-            type: [String],
-            default: []
-        }
-    },
-}, { timestamps: true })
-
-const postSchema = mongoose.Schema({
+const postSchema = mongoose.Schema(
+  {
     title: {
-        type: String,
-        required: [true, 'Title must be provided']
+      type: String,
+      required: [true, "Title must be provided"],
     },
     content: {
-        type: String,
-        required: [true, 'Content must be provided']
+      type: String,
+      required: [true, "Content must be provided"],
     },
     createdBy: {
-        type: String,
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    likes: {
-        usersId: {
-            type: [String],
-            default: []
-        }
-    },
-    comments: [CommentSchema]
-}, { timestamps: true })
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: [],
+      },
+    ],
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+        default: [],
+      },
+    ],
+  },
+  { timestamps: true }
+)
 
-
-
-module.exports = mongoose.model('Post', postSchema)
+module.exports = mongoose.model("Post", postSchema)
