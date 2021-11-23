@@ -1,7 +1,6 @@
-import React, { useEffect, useCallback, useState } from "react"
+import React from "react"
 import styled from "styled-components"
 import { Link, useNavigate } from "react-router-dom"
-import { useAppRequestsContext } from "../context/appRequestsContext"
 import { useAuthContext } from "../context/authContext"
 
 const Card = styled.div`
@@ -42,61 +41,58 @@ const CardFooter = styled.div`
   font-weight: normal;
 `
 
-const SinglePost = ({ id, title, content, likes, createdBy, createdAt }) => {
-  const { getUser } = useAppRequestsContext()
-  const { getUserID } = useAuthContext()
+const SinglePost = ({ post }) => {
+  const {
+    _id: postID,
+    title,
+    content,
+    createdBy: { _id: userID, username, image },
+    likes,
+    createdAt,
+  } = post
 
-  const [user, setUser] = useState({})
+  const { loggedInUser } = useAuthContext()
 
   const navigate = useNavigate()
 
-  const fetchUser = useCallback(async () => {
-    const response = await getUser(`users/${createdBy._id}`)
-    setUser({ ...response.data.user })
-  }, [getUser, createdBy])
-
   const editPost = () => {
-    navigate(`/edit-post/${id}`)
+    navigate(`/edit-post/${postID}`)
   }
-
-  useEffect(() => {
-    fetchUser()
-  }, [fetchUser])
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        {createdBy === getUserID() && (
+        {userID === loggedInUser.id && (
           <EditIcon onClick={editPost}>Edit</EditIcon>
         )}
       </CardHeader>
       <CardContent>{content}</CardContent>
       <CardMeta>
         <p>
-          {createdBy === getUserID() ? (
-            <Link to={`/users/${getUserID()}`}>
-              <img
-                className="preview-image"
-                alt={user.username}
-                src={user.image}
-              />
+          {userID === loggedInUser.id ? (
+            <Link to={`/users/${loggedInUser.id}`}>
+              <img className="preview-image" alt={username} src={image} />
               You
             </Link>
           ) : (
-            <Link to={`/users/${createdBy}`}>
-              <img
-                className="preview-image"
-                alt={user.username}
-                src={user.image}
-              />
-              {user.username}
+            <Link to={`/users/${userID}`}>
+              <img className="preview-image" alt={username} src={image} />
+              {username}
             </Link>
           )}
         </p>
         <p>{new Date(createdAt).toDateString()}</p>
       </CardMeta>
-      <CardFooter>Likes: {likes.length}</CardFooter>
+      <CardFooter>
+        Likes: {likes.length}{" "}
+        {likes.map((like) => (
+          <div key={like._id}>
+            <img className="preview-image" src={like.image} />
+            {like.username}
+          </div>
+        ))}
+      </CardFooter>
     </Card>
   )
 }

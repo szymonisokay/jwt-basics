@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react"
+import React, { useContext, useState, useEffect, useCallback } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import axios from "axios"
 import jwt_decode from "jwt-decode"
@@ -7,33 +7,38 @@ const AuthContext = React.createContext()
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loggedInUser, setLoggedInUser] = useState({})
 
   const location = useLocation()
   const navigate = useNavigate()
 
-  const decodeToken = () => {
-    if (!localStorage.getItem("user")) return
+  const authenticateUser = useCallback(() => {
+    const { user } = JSON.parse(localStorage.getItem("user"))
+    setLoggedInUser(user)
+    setIsAuthenticated(true)
+  }, [])
 
-    const token = JSON.parse(localStorage.getItem("user")).token
+  const decodeToken = () => {
+    const token = getToken()
     const { exp, id } = jwt_decode(token)
 
     return { exp, id }
   }
 
   const deleteToken = () => {
-    if (!localStorage.getItem("user")) return
+    if (!isAuthenticated) return
 
     localStorage.removeItem("user")
     setIsAuthenticated(false)
   }
 
-  const setToken = (response) => {
-    console.log(response)
+  const setTokenAndUser = (response) => {
+    const { token, id, username, email, image } = response.data.user
     localStorage.setItem(
       "user",
       JSON.stringify({
-        username: response.data.user.username,
-        token: response.data.user.token,
+        token,
+        user: { id, username, email, image },
       })
     )
   }
@@ -46,14 +51,13 @@ export const AuthProvider = ({ children }) => {
   }
 
   const getUserID = () => {
-    if (!localStorage.getItem("user")) return
+    if (!isAuthenticated) return
 
     const { id } = decodeToken()
     return id
   }
 
   const navigateToDashboard = () => {
-    setIsAuthenticated(true)
     setTimeout(
       () => navigate(`${location.state?.pathname || "/"}`, { replace: true }),
       1000
@@ -70,8 +74,8 @@ export const AuthProvider = ({ children }) => {
         }
       )
 
-      setToken(response)
-
+      setTokenAndUser(response)
+      authenticateUser()
       navigateToDashboard()
       return { msg: response.data.msg, type: "success" }
     } catch (error) {
@@ -90,7 +94,7 @@ export const AuthProvider = ({ children }) => {
         }
       )
 
-      setToken(response)
+      setTokenAndUser(response)
 
       navigateToDashboard()
       return { msg: response.data.msg, type: "success" }
@@ -100,19 +104,20 @@ export const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (!localStorage.getItem("user")) return
+    if (!getToken() && !isAuthenticated) return
 
     const { exp } = decodeToken()
 
     if (Date.now() >= exp * 1000) return deleteToken()
 
-    localStorage.getItem("user") && setIsAuthenticated(true)
+    authenticateUser()
   }, [setIsAuthenticated])
 
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        loggedInUser,
         setIsAuthenticated,
         signIn,
         signUp,

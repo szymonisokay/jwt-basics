@@ -44,17 +44,14 @@ const Login = async (req, res) => {
       process.env.SECRET,
       { expiresIn: "1d" }
     )
-    console.log(user)
     res.status(200).json({
       msg: "Logged in successfully",
       user: {
         token,
-        user: {
-          id: user._id,
-          username: user.username,
-          image: user.image,
-          email: user.email,
-        },
+        id: user._id,
+        username: user.username,
+        image: user.image,
+        email: user.email,
       },
     })
   } catch (error) {
