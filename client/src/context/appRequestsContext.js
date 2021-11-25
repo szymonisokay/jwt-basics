@@ -1,10 +1,12 @@
-import React, { useContext } from "react"
+import React, { useContext, useRef } from "react"
 import axios from "axios"
 import { useAuthContext } from "./authContext"
 
 const AppRequestsContext = React.createContext()
 
 export const AppRequestsProvider = ({ children }) => {
+  const source = axios.CancelToken.source()
+
   const mainUrl = "http://localhost:3000/api/"
   const { getToken, loggedInUser } = useAuthContext()
   const token = getToken()
@@ -41,8 +43,11 @@ export const AppRequestsProvider = ({ children }) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      cancelToken: source.token,
     })
-    return response
+
+    console.log(source)
+    return { response, source }
   }
 
   // Post requests
@@ -78,9 +83,10 @@ export const AppRequestsProvider = ({ children }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        cancelToken: source.token,
       }
     )
-    return response
+    return { response, source }
   }
 
   return (

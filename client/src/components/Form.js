@@ -34,12 +34,14 @@ const Form = ({ method }) => {
     [infoText, setInfoText] = useState([])
 
   const titleRef = useRef(),
-    contentRef = useRef()
+    contentRef = useRef(),
+    cancelTokenRef = useRef()
 
   const fetchPost = useCallback(async () => {
     const response = await getSinglePost(`posts/${postID}`)
-
-    setInputData(response.data.post)
+    cancelTokenRef.current = response.source
+    console.log(cancelTokenRef.current)
+    setInputData(response.response.data.post)
   }, [getSinglePost, postID])
 
   const setInputData = ({ title, content }) => {
@@ -65,7 +67,8 @@ const Form = ({ method }) => {
         response = await editPost(`posts/${postID}`, title, content)
       else response = await createPost("posts", title, content)
 
-      return showInfo(response.data.msg, "success")
+      cancelTokenRef.current = response.source
+      return showInfo(response.response.data.msg, "success")
     } catch (error) {
       return showInfo(error.response.data.msg, "failed")
     }
@@ -85,6 +88,10 @@ const Form = ({ method }) => {
 
   useEffect(() => {
     if (method === "edit") return fetchPost()
+
+    return () => {
+      cancelTokenRef.current.cancel("cancel")
+    }
   }, [method, fetchPost])
 
   return (
