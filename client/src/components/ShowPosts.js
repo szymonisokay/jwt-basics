@@ -3,7 +3,6 @@ import styled from "styled-components"
 // Components
 import SinglePost from "./SinglePost"
 import axios from "axios"
-import { useAppRequestsContext } from "../context/appRequestsContext"
 import { useAuthContext } from "../context/authContext"
 
 const PostsContainer = styled.div``
@@ -33,8 +32,6 @@ const ShowPosts = ({ title, type }) => {
   const { getToken, loggedInUser } = useAuthContext()
   const token = getToken()
 
-  const { getAllPosts, getUsersPosts } = useAppRequestsContext()
-
   const fetchAllPosts = useCallback(async () => {
     try {
       let response
@@ -60,7 +57,7 @@ const ShowPosts = ({ title, type }) => {
     } catch (error) {
       console.log(error)
     }
-  }, [getAllPosts, getUsersPosts, type])
+  }, [type, loggedInUser, token])
 
   useEffect(() => {
     fetchAllPosts()

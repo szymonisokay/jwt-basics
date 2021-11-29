@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom"
 import Form from "../components/Form"
 import Layout from "../components/Layout"
 import styled from "styled-components"
-
+import { useAuthContext } from "../context/authContext"
 import axios from "axios"
 
 const Text = styled.h2`
@@ -30,9 +30,12 @@ const Subtitle = styled.p`
 `
 
 const EditPost = () => {
-  const [post, setPost] = useState({ title: "", content: "" })
+  const [post, setPost] = useState({})
   const [loading, setLoading] = useState(true)
   const { id } = useParams()
+
+  const { getToken } = useAuthContext()
+  const token = getToken()
 
   const sourceRef = useRef()
   sourceRef.current = axios.CancelToken.source()
@@ -52,6 +55,27 @@ const EditPost = () => {
     }
   }, [id])
 
+  const editPost = async (title, content) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/api/posts/${post._id}`,
+        {
+          title,
+          content,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cancelToken: sourceRef.current.token,
+        }
+      )
+      console.log(response)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     fetchPost()
     return () => {
@@ -64,13 +88,7 @@ const EditPost = () => {
       <Card>
         <Text>Edit Post</Text>
         {loading && <p>Loading</p>}
-        {!loading && (
-          <Form
-            method="edit"
-            postTitle={post.title}
-            postContent={post.content}
-          />
-        )}
+        {!loading && <Form method="edit" {...post} editPost={editPost} />}
       </Card>
       <Subtitle>
         <Link to="/">Go to dashboard</Link>

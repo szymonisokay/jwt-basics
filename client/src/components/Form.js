@@ -25,7 +25,7 @@ const Button = styled.button`
   color: white;
 `
 
-const Form = ({ method, postTitle, postContent }) => {
+const Form = ({ method, title: postTitle, content: postContent, editPost }) => {
   const { getToken } = useAuthContext()
   const token = getToken()
 
@@ -44,6 +44,8 @@ const Form = ({ method, postTitle, postContent }) => {
     e.preventDefault()
     if (!title || !content)
       return showInfo("One of the fields is empty!", "failed")
+
+    if (method === "edit") return editPost(title, content)
 
     try {
       const response = await axios.post(
