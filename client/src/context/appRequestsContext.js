@@ -72,7 +72,7 @@ export const AppRequestsProvider = ({ children }) => {
   // Put requests
 
   // http://localhost:3000/api/posts/:id
-  const editPost = async (url, title, content) => {
+  const editPost = async (url, title, content, cancelToken) => {
     const response = await axios.put(
       `${mainUrl}${url}`,
       {
@@ -83,10 +83,12 @@ export const AppRequestsProvider = ({ children }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        cancelToken: source.token,
+        cancelToken: cancelToken,
       }
     )
-    return { response, source }
+
+    console.log(response)
+    return response
   }
 
   return (

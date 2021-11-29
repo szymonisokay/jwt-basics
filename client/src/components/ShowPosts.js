@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useRef } from "react"
 import styled from "styled-components"
 // Components
 import SinglePost from "./SinglePost"
-
+import axios from "axios"
 import { useAppRequestsContext } from "../context/appRequestsContext"
+import { useAuthContext } from "../context/authContext"
 
 const PostsContainer = styled.div``
 
@@ -26,15 +27,32 @@ const ShowPosts = ({ title, type }) => {
   const [posts, setPosts] = useState([]),
     [isLoading, setIsLoading] = useState(false)
 
+  const sourceRef = useRef()
+  sourceRef.current = axios.CancelToken.source()
+
+  const { getToken, loggedInUser } = useAuthContext()
+  const token = getToken()
+
   const { getAllPosts, getUsersPosts } = useAppRequestsContext()
 
   const fetchAllPosts = useCallback(async () => {
     try {
       let response
       setIsLoading(true)
-      if (type === "auth") response = await getUsersPosts("posts")
-      else {
-        response = await getAllPosts("posts")
+      if (type === "auth") {
+        response = await axios.get(
+          `http://localhost:3000/api/posts?user=${loggedInUser.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            cancelToken: sourceRef.current.token,
+          }
+        )
+      } else {
+        response = await axios.get(`http://localhost:3000/api/posts`, {
+          cancelToken: sourceRef.current.token,
+        })
       }
 
       setPosts(response.data.posts)
@@ -46,6 +64,10 @@ const ShowPosts = ({ title, type }) => {
 
   useEffect(() => {
     fetchAllPosts()
+
+    return () => {
+      sourceRef.current.cancel("Cancel")
+    }
   }, [fetchAllPosts])
 
   return (

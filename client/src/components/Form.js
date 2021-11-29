@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import styled from "styled-components"
-import { useAppRequestsContext } from "../context/appRequestsContext"
 import Info from "./Info"
-import { useParams } from "react-router-dom"
+import axios from "axios"
+import { useAuthContext } from "../context/authContext"
 
 const FormContainer = styled.form`
   max-width: 500px;
@@ -25,55 +25,45 @@ const Button = styled.button`
   color: white;
 `
 
-const Form = ({ method }) => {
-  const { createPost, getSinglePost, editPost } = useAppRequestsContext()
-  const { id: postID } = useParams()
+const Form = ({ method, postTitle, postContent }) => {
+  const { getToken } = useAuthContext()
+  const token = getToken()
 
   const [isInfo, setIsInfo] = useState(false),
     [infoType, setInfoType] = useState(""),
     [infoText, setInfoText] = useState([])
 
-  const titleRef = useRef(),
-    contentRef = useRef(),
-    cancelTokenRef = useRef()
+  const [title, setTitle] = useState(postTitle || ""),
+    [content, setContent] = useState(postContent || "")
 
-  const fetchPost = useCallback(async () => {
-    const response = await getSinglePost(`posts/${postID}`)
-    cancelTokenRef.current = response.source
-    console.log(cancelTokenRef.current)
-    setInputData(response.response.data.post)
-  }, [getSinglePost, postID])
-
-  const setInputData = ({ title, content }) => {
-    titleRef.current.value = title
-    contentRef.current.value = content
-  }
+  const sourceRef = useRef()
+  sourceRef.current = axios.CancelToken.source()
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    setInfoText([])
     setIsInfo(false)
-
-    const title = titleRef.current.value,
-      content = contentRef.current.value
-
+    e.preventDefault()
     if (!title || !content)
-      return showInfo("One of the fields is empty!", "#AF0000")
+      return showInfo("One of the fields is empty!", "failed")
 
     try {
-      let response
-      if (method === "edit")
-        response = await editPost(`posts/${postID}`, title, content)
-      else response = await createPost("posts", title, content)
+      const response = await axios.post(
+        "http://localhost:3000/api/posts",
+        {
+          title,
+          content,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cancelToken: sourceRef.current.token,
+        }
+      )
 
-      cancelTokenRef.current = response.source
-      return showInfo(response.response.data.msg, "success")
+      console.log(response)
     } catch (error) {
-      return showInfo(error.response.data.msg, "failed")
+      console.log(error)
     }
-
-    // console.log(title, content)
   }
 
   if (isInfo) {
@@ -87,21 +77,25 @@ const Form = ({ method }) => {
   }
 
   useEffect(() => {
-    if (method === "edit") return fetchPost()
-
     return () => {
-      cancelTokenRef.current.cancel("cancel")
+      sourceRef.current.cancel("cancel")
     }
-  }, [method, fetchPost])
+  }, [])
 
   return (
     <FormContainer onSubmit={handleSubmit}>
-      <Input className="form-input" placeholder="Title" ref={titleRef} />
+      <Input
+        className="form-input"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
       <Textarea
         className="form-input"
         rows="10"
         placeholder="Content"
-        ref={contentRef}
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
       />
       {isInfo && <Info text={infoText} type={infoType} />}
       <Button>{method === "edit" ? "Edit post" : "Add post"}</Button>

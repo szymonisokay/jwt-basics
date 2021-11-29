@@ -1,44 +1,82 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import Form from '../components/Form'
-import Layout from '../components/Layout'
-import styled from 'styled-components';
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { Link, useParams } from "react-router-dom"
+import Form from "../components/Form"
+import Layout from "../components/Layout"
+import styled from "styled-components"
+
+import axios from "axios"
 
 const Text = styled.h2`
-    text-transform: uppercase; 
-    margin-bottom: 1rem;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
 `
 
 const Card = styled.div`
-    max-width: 500px;
-    margin: 0 auto;
-    border-radius: 0.75rem;
-    box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
-    padding: 2rem;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: 0.75rem;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
 `
 
 const Subtitle = styled.p`
-    font-size: 0.9rem;
-    text-align: center;
-    margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 1rem;
 
-    a:hover {
-        text-decoration: underline;
-    }
+  a:hover {
+    text-decoration: underline;
+  }
 `
 
 const EditPost = () => {
-    return (
-        <Layout>
-            <Card>
-                <Text>Edit Post</Text>
-                <Form method="edit" />
-            </Card>
-            <Subtitle>
-                <Link to="/" >Go to dashboard</Link>
-            </Subtitle>
-        </Layout>
-    )
+  const [post, setPost] = useState({ title: "", content: "" })
+  const [loading, setLoading] = useState(true)
+  const { id } = useParams()
+
+  const sourceRef = useRef()
+  sourceRef.current = axios.CancelToken.source()
+
+  const fetchPost = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/posts/${id}`,
+        {
+          cancelToken: sourceRef.current.token,
+        }
+      )
+      setPost(response.data.post)
+      setLoading(false)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [id])
+
+  useEffect(() => {
+    fetchPost()
+    return () => {
+      sourceRef.current.cancel("cancel")
+    }
+  }, [fetchPost])
+
+  return (
+    <Layout>
+      <Card>
+        <Text>Edit Post</Text>
+        {loading && <p>Loading</p>}
+        {!loading && (
+          <Form
+            method="edit"
+            postTitle={post.title}
+            postContent={post.content}
+          />
+        )}
+      </Card>
+      <Subtitle>
+        <Link to="/">Go to dashboard</Link>
+      </Subtitle>
+    </Layout>
+  )
 }
 
 export default EditPost
