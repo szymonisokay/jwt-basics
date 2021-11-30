@@ -14,9 +14,14 @@ const Posts: React.FC<PropTypes> = ({ posts, title }) => {
   return (
     <div>
       <h2 className="posts-title">{title}</h2>
-      <Grid container spacing={2} style={{ margin: "0", width: "100%" }}>
-        {posts.map((post) => (
-          <Grid item lg="auto">
+      <Grid
+        container
+        spacing={2}
+        columns={{ xs: 1, sm: 4, md: 12 }}
+        style={{ margin: "0", width: "100%" }}
+      >
+        {posts.map((post, index) => (
+          <Grid item xs={1} sm={2} md={4} key={index}>
             <SinglePost key={post._id} post={post} />
           </Grid>
         ))}
