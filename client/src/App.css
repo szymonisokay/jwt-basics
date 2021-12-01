@@ -36,3 +36,10 @@ ul {
 .posts-title {
   margin: 2rem 0;
 }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-gap: 1rem;
+  align-items: start;
+}
