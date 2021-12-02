@@ -1,13 +1,10 @@
 import React from "react"
 import { CommentType } from "../../types"
 import Collapse from "@mui/material/Collapse"
-import Avatar from "@mui/material/Avatar"
-import CardHeader from "@mui/material/CardHeader"
-import FavoriteIcon from "@mui/icons-material/Favorite"
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder"
-import IconButton from "@mui/material/IconButton"
-import MoreVertIcon from "@mui/icons-material/MoreVert"
-import { flexbox } from "@mui/system"
+import InputBase from "@mui/material/InputBase"
+import Paper from "@mui/material/Paper"
+import SingleComment from "./SingleComment"
+import Button from "@mui/material/Button"
 
 type PropsType = {
   comments: CommentType[]
@@ -15,45 +12,26 @@ type PropsType = {
 }
 
 const CommentsSection: React.FC<PropsType> = ({ comments, expanded }) => {
-  console.log(comments)
   return (
     <Collapse in={expanded} timeout='auto' unmountOnExit>
+      <Paper
+        component='form'
+        sx={{
+          margin: "0.5rem 1rem",
+          padding: "0.5rem 0.5rem 0.5rem 1rem",
+          display: "flex",
+        }}
+        elevation={1}
+      >
+        <InputBase placeholder='Add comment' sx={{ flex: 2 }} />
+        <Button aria-label='menu'>Add</Button>
+      </Paper>
       {comments.length > 0 ? (
         comments.map((comment) => (
-          <CardHeader
-            key={comment._id}
-            avatar={
-              <Avatar
-                src={comment.createdBy.image}
-                style={{ width: "30px", height: "30px" }}
-              />
-            }
-            title={comment.content}
-            subheader={
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <IconButton>
-                  <FavoriteIcon style={{ height: "15px", width: "15px" }} />
-                </IconButton>
-                {comment.likes.length === 1
-                  ? `${comment.likes.length} like`
-                  : `${comment.likes.length} likes`}
-                <div
-                  style={{
-                    display: "flex",
-                    flex: 2,
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <IconButton>
-                    <MoreVertIcon />
-                  </IconButton>
-                </div>
-              </div>
-            }
-          />
+          <SingleComment key={comment._id} comment={comment} />
         ))
       ) : (
-        <p>No comments</p>
+        <p className='no-comments'>No comments</p>
       )}
     </Collapse>
   )
