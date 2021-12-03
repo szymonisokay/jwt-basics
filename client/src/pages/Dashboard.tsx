@@ -26,13 +26,26 @@ const Dashboard = () => {
   }, [fetchPosts])
 
   return (
-    <ContainerUtil>
-      {loading && <CircularProgress color="secondary" />}
-      {posts.length === 0 && !loading && <p>No posts</p>}
-      {posts.length > 0 && !loading && (
-        <Posts posts={posts} title="All posts" />
-      )}
-    </ContainerUtil>
+    <div className='main-container'>
+      <ContainerUtil>
+        {loading && (
+          <div
+            style={{
+              height: "100vh",
+              width: "100%",
+              display: "grid",
+              placeContent: "center",
+            }}
+          >
+            <CircularProgress color='secondary' />
+          </div>
+        )}
+        {posts.length === 0 && !loading && <p>No posts</p>}
+        {posts.length > 0 && !loading && (
+          <Posts posts={posts} title='All posts' />
+        )}
+      </ContainerUtil>
+    </div>
   )
 }
 

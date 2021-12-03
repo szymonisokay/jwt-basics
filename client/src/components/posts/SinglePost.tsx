@@ -16,6 +16,7 @@ import Typography from "@mui/material/Typography"
 import { PostType } from "../../types"
 import SinglePostMenu from "./SinglePostMenu"
 import CommentsSection from "./CommentsSection"
+import ShowUsersModal from "./ShowUsersModal"
 
 type PropsType = {
   post: PostType
@@ -23,9 +24,10 @@ type PropsType = {
 
 const SinglePost: React.FC<PropsType> = ({ post }) => {
   const [like, setLike] = useState<boolean>(false)
+  const [isModalOpened, setIsModalOpened] = useState<boolean>(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [expanded, setExpanded] = useState<boolean>(false)
-  const open = Boolean(anchorEl)
+  const isMenuOpened = Boolean(anchorEl)
 
   const likePost = () => {
     setLike(!like)
@@ -37,6 +39,14 @@ const SinglePost: React.FC<PropsType> = ({ post }) => {
 
   const closeMenu = () => {
     setAnchorEl(null)
+  }
+
+  const openModal = () => {
+    setIsModalOpened(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpened(false)
   }
 
   const showComments = () => {
@@ -56,11 +66,12 @@ const SinglePost: React.FC<PropsType> = ({ post }) => {
               onClick={openMenu}
               aria-controls='post-menu'
               aria-haspopup='true'
-              aria-expanded={open ? "true" : undefined}
+              aria-expanded={isMenuOpened ? "true" : undefined}
             >
               <MoreVertIcon />
             </IconButton>
           }
+          classes={{ action: "margin-auto" }}
         />
         <CardContent>{post.content}</CardContent>
         <CardActions style={{ display: "flex" }}>
@@ -75,8 +86,14 @@ const SinglePost: React.FC<PropsType> = ({ post }) => {
             <ChatBubbleOutlineIcon />
           </IconButton>
           <Typography
+            onClick={openModal}
             variant='body2'
-            style={{ padding: "0 0.5rem", flex: 2, textAlign: "right" }}
+            style={{
+              padding: "0 0.5rem",
+              flex: 2,
+              textAlign: "right",
+              cursor: "pointer",
+            }}
           >
             {post.likes.length === 1
               ? `${post.likes.length} like`
@@ -85,7 +102,16 @@ const SinglePost: React.FC<PropsType> = ({ post }) => {
         </CardActions>
         <CommentsSection comments={post.comments} expanded={expanded} />
       </Card>
-      <SinglePostMenu open={open} handleClose={closeMenu} anchorEl={anchorEl} />
+      <SinglePostMenu
+        open={isMenuOpened}
+        handleClose={closeMenu}
+        anchorEl={anchorEl}
+      />
+      <ShowUsersModal
+        users={post.likes}
+        open={isModalOpened}
+        handleClose={closeModal}
+      />
     </>
   )
 }

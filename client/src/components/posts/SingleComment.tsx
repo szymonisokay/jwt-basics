@@ -10,6 +10,8 @@ import FavoriteIcon from "@mui/icons-material/Favorite"
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder"
 import IconButton from "@mui/material/IconButton"
 import MoreVertIcon from "@mui/icons-material/MoreVert"
+import CommentMenu from "./CommentMenu"
+import ShowUsersModal from "./ShowUsersModal"
 
 type PropsType = {
   comment: CommentType
@@ -17,9 +19,28 @@ type PropsType = {
 
 const SingleComment: React.FC<PropsType> = ({ comment }) => {
   const [like, setLike] = useState<boolean>(false)
+  const [isModalOpened, setIsModalOpened] = useState<boolean>(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const isMenuOpened = Boolean(anchorEl)
 
   const LikeComment = () => {
     setLike(!like)
+  }
+
+  const openMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const closeMenu = () => {
+    setAnchorEl(null)
+  }
+
+  const openModal = () => {
+    setIsModalOpened(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpened(false)
   }
 
   return (
@@ -55,16 +76,35 @@ const SingleComment: React.FC<PropsType> = ({ comment }) => {
               {like ? <FavoriteIcon color='error' /> : <FavoriteBorderIcon />}
             </IconButton>
           </span>
-          <span className='comment-item__content-meta__likes'>
+          <span
+            onClick={openModal}
+            className='comment-item__content-meta__likes'
+          >
             {comment.likes.length === 1
               ? `${comment.likes.length} like`
               : `${comment.likes.length} likes`}
           </span>
         </Typography>
       </div>
-      <IconButton>
+      <IconButton
+        aria-label='settings'
+        onClick={openMenu}
+        aria-controls='post-menu'
+        aria-haspopup='true'
+        aria-expanded={isMenuOpened ? "true" : undefined}
+      >
         <MoreVertIcon style={{ height: "20px", width: "20px" }} />
       </IconButton>
+      <CommentMenu
+        open={isMenuOpened}
+        handleClose={closeMenu}
+        anchorEl={anchorEl}
+      />
+      <ShowUsersModal
+        users={comment.likes}
+        open={isModalOpened}
+        handleClose={closeModal}
+      />
     </div>
   )
 }

@@ -7,16 +7,17 @@ const getAllPosts = async (req, res) => {
       // fetch all posts from database
       const posts = await Post.find({})
         .sort("-createdAt")
-        .populate({ path: "createdBy", select: "username image" })
+        .select("-__v")
+        .populate({ path: "createdBy", select: "username image email" })
         .populate({
           path: "comments",
-          populate: { path: "likes", select: "username image" },
+          populate: { path: "likes", select: "username image email" },
         })
         .populate({
           path: "comments",
-          populate: { path: "createdBy", select: "username image" },
+          populate: { path: "createdBy", select: "username image email" },
         })
-        .populate({ path: "likes", select: "username image" })
+        .populate({ path: "likes", select: "username image email" })
 
       return res.status(200).json({ msg: "All posts", posts })
     }
@@ -24,16 +25,17 @@ const getAllPosts = async (req, res) => {
     // fetch posts from specific user from database
     const posts = await Post.find({ createdBy: req.query.user })
       .sort("-createdAt")
-      .populate({ path: "createdBy", select: "username image" })
+      .select("-__v")
+      .populate({ path: "createdBy", select: "username image email" })
       .populate({
         path: "comments",
-        populate: { path: "likes", select: "username image" },
+        populate: { path: "likes", select: "username image email" },
       })
       .populate({
         path: "comments",
-        populate: { path: "createdBy", select: "username image" },
+        populate: { path: "createdBy", select: "username image email" },
       })
-      .populate({ path: "likes", select: "username image" })
+      .populate({ path: "likes", select: "username image email" })
 
     res.status(200).json({ msg: "User posts", posts })
   } catch (error) {
@@ -59,12 +61,13 @@ const getPost = async (req, res) => {
     const { id: postID } = req.params
 
     const post = await Post.findOne({ _id: postID })
-      .populate({ path: "createdBy", select: "username image" })
+      .select("-__v")
+      .populate({ path: "createdBy", select: "username image email" })
       .populate({
         path: "comments",
-        populate: { path: "createdBy", select: "username image" },
+        populate: { path: "createdBy", select: "username image email" },
       })
-      .populate({ path: "likes", select: "username image" })
+      .populate({ path: "likes", select: "username image email" })
 
     if (!post) return res.status(404).json({ msg: "Post not found" })
 
