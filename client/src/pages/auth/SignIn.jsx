@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import { Button, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { useAuthContext } from "../../context/AuthContext"
+import logo from "../../images/logo.png"
 
 const SignIn = () => {
   const [email, setEmail] = useState("")
@@ -20,10 +21,12 @@ const SignIn = () => {
       <div className='card'>
         <Box component='form' onSubmit={handleSubmit}>
           <div className='card-header'>
-            <Typography variant='h4' sx={{ fontWeight: "bold" }}>
-              PostsManager
-            </Typography>
-            <Typography variant='body1' color='GrayText'>
+            <img src={logo} alt='PostsManager' />
+            <Typography
+              variant='body1'
+              color='GrayText'
+              sx={{ marginTop: "1rem" }}
+            >
               Sign in to your account
             </Typography>
           </div>
@@ -32,6 +35,7 @@ const SignIn = () => {
               id='email'
               label='Email'
               variant='standard'
+              color='secondary'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               sx={{ marginBottom: "1rem" }}
@@ -41,6 +45,7 @@ const SignIn = () => {
               label='Password'
               type='password'
               variant='standard'
+              color='secondary'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
