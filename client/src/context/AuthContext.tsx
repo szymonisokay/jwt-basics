@@ -17,7 +17,7 @@ type UserObject = {
 type ContextType = {
   isAuthenticated: boolean
   loggedInUser: UserType
-  signIn: () => void
+  signIn: (email: string, password: string) => { msg: string; type: string }
   signUp: () => void
   signOut: () => void
 }
@@ -29,7 +29,8 @@ export const AuthProvider: React.FC<Type> = ({ children }) => {
   const [loggedInUser, setLoggedInUser] = useState<UserType | {}>({})
 
   const signIn = async (email: string, password: string) => {
-    if (!email || !password) return console.log("Fields must not be empty!")
+    if (!email || !password)
+      return { msg: "Fields must not be empty!", type: "failed" }
 
     try {
       const response = await axios.post(
@@ -39,9 +40,11 @@ export const AuthProvider: React.FC<Type> = ({ children }) => {
           password,
         }
       )
+
       authenticateUser(response.data.user)
+      return { msg: response.data.msg, type: "success" }
     } catch (error) {
-      console.log("Something went wrong")
+      return { msg: "Something went wrong!", type: "failed" }
     }
   }
 

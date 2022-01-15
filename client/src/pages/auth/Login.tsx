@@ -1,21 +1,46 @@
 import React, { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 //MUI
 import { Button, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { useAuthContext } from "../../context/AuthContext"
 import logo from "../../images/logo.png"
+import Info from "../../components/utils/Info"
 
-const SignIn = () => {
+const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const { signIn } = useAuthContext()
+  const [loading, setLoading] = useState(false)
+  const [info, setInfo] = useState(false)
+  const [infoType, setInfoType] = useState("")
+  const [infoMsg, setInfoMsg] = useState("")
 
-  const handleSubmit = (e) => {
+  const { signIn } = useAuthContext()
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e: any) => {
     e.preventDefault()
-    signIn(email, password)
     setEmail("")
     setPassword("")
+    setLoading(true)
+    setInfo(false)
+
+    const response = await signIn(email, password)
+
+    setLoading(false)
+
+    if (response?.type === "success") {
+      setInfoBox(response.msg, response.type)
+      setTimeout(() => navigate("/"), 1000)
+    } else if (response?.type === "failed") {
+      setInfoBox(response.msg, response.type)
+    }
+  }
+
+  const setInfoBox = (msg: string, type: string) => {
+    setInfo(true)
+    setInfoMsg(msg)
+    setInfoType(type)
   }
 
   return (
@@ -62,9 +87,10 @@ const SignIn = () => {
                 ":hover": { background: "#292f44" },
               }}
             >
-              Sign In
+              {loading ? "Loading" : "Sign In"}
             </Button>
           </div>
+          {info && <Info msg={infoMsg} type={infoType} />}
         </Box>
       </div>
 
@@ -79,4 +105,4 @@ const SignIn = () => {
   )
 }
 
-export default SignIn
+export default Login

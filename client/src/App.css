@@ -80,6 +80,26 @@ ul {
   color: #fff;
   font-size: 16px;
   font-family: inherit;
+  cursor: pointer;
+}
+
+.info-box {
+  padding: 10px;
+  margin-top: 20px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.info-box.success {
+  background: rgb(0, 151, 58);
+  color: white;
+  box-shadow: 0px 3px 10px rgb(0 151 58 / 50%);
+}
+
+.info-box.failed {
+  background: rgb(192, 0, 0);
+  color: white;
+  box-shadow: 0px 3px 10px rgb(192 0 0 / 50%);
 }
 
 .posts-title {
