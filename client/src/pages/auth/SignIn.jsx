@@ -14,6 +14,8 @@ const SignIn = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     signIn(email, password)
+    setEmail("")
+    setPassword("")
   }
 
   return (
