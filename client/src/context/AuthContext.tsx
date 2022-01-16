@@ -1,6 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react"
-import { UserType } from "../types"
-import axios from "axios"
+import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { UserType } from '../types'
+import axios from 'axios'
 
 type Type = {
   children: React.ReactNode
@@ -18,8 +18,14 @@ type ContextType = {
   isAuthenticated: boolean
   loggedInUser: UserType
   signIn: (email: string, password: string) => { msg: string; type: string }
-  signUp: () => void
+  signUp: (
+    username: string,
+    email: string,
+    password: string,
+    confirmPassword: string
+  ) => { msg: string; type: string }
   signOut: () => void
+  getToken: () => string | undefined
 }
 
 const AuthContext = React.createContext({})
@@ -30,11 +36,11 @@ export const AuthProvider: React.FC<Type> = ({ children }) => {
 
   const signIn = async (email: string, password: string) => {
     if (!email || !password)
-      return { msg: "Fields must not be empty!", type: "failed" }
+      return { msg: 'Fields must not be empty!', type: 'failed' }
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        'http://localhost:5000/api/auth/login',
         {
           email,
           password,
@@ -42,9 +48,9 @@ export const AuthProvider: React.FC<Type> = ({ children }) => {
       )
 
       authenticateUser(response.data.user)
-      return { msg: response.data.msg, type: "success" }
+      return { msg: response.data.msg, type: 'success' }
     } catch (error) {
-      return { msg: "Something went wrong!", type: "failed" }
+      return { msg: 'Something went wrong!', type: 'failed' }
     }
   }
 
@@ -53,7 +59,29 @@ export const AuthProvider: React.FC<Type> = ({ children }) => {
     email: string,
     password: string,
     confirmPassword: string
-  ) => {}
+  ) => {
+    if (!username || !email || !password || !confirmPassword)
+      return { msg: 'Fields must not be empty!', type: 'failed' }
+
+    if (password !== confirmPassword)
+      return { msg: 'Passwords do not match!', type: 'failed' }
+
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/api/auth/register',
+        {
+          username,
+          email,
+          password,
+        }
+      )
+
+      authenticateUser(response.data.user)
+      return { msg: response.data.msg, type: 'success' }
+    } catch (error) {
+      return { msg: 'Something went wrong!', type: 'failed' }
+    }
+  }
 
   const authenticateUser = useCallback((user: UserObject): void => {
     setLoggedInUser({
@@ -68,7 +96,7 @@ export const AuthProvider: React.FC<Type> = ({ children }) => {
 
   const createSession = (user: UserObject): void => {
     localStorage.setItem(
-      "user",
+      'user',
       JSON.stringify({
         id: user.id,
         username: user.username,
@@ -80,13 +108,21 @@ export const AuthProvider: React.FC<Type> = ({ children }) => {
   }
 
   const signOut = () => {
-    localStorage.removeItem("user")
+    localStorage.removeItem('user')
     setLoggedInUser({})
     setIsAuthenticated(false)
   }
 
+  const getToken = (): string | undefined => {
+    const user = localStorage.getItem('user')
+    if (!user) return undefined
+
+    const token: string = JSON.parse(user).token
+    return token
+  }
+
   useEffect(() => {
-    const user = localStorage.getItem("user")
+    const user = localStorage.getItem('user')
     if (!user) return
 
     authenticateUser(JSON.parse(user))
@@ -94,7 +130,14 @@ export const AuthProvider: React.FC<Type> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, loggedInUser, signIn, signUp, signOut }}
+      value={{
+        isAuthenticated,
+        loggedInUser,
+        signIn,
+        signUp,
+        signOut,
+        getToken,
+      }}
     >
       {children}
     </AuthContext.Provider>

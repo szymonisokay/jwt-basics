@@ -1,17 +1,20 @@
-import React, { useState } from "react"
+import React, { useState } from 'react'
 // Types
-import { CommentType } from "../../types"
+import { CommentType } from '../../types'
 // Router
-import { Link } from "react-router-dom"
+import { Link } from 'react-router-dom'
 // MUI
-import Avatar from "@mui/material/Avatar"
-import Typography from "@mui/material/Typography"
-import FavoriteIcon from "@mui/icons-material/Favorite"
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder"
-import IconButton from "@mui/material/IconButton"
-import MoreVertIcon from "@mui/icons-material/MoreVert"
-import CommentMenu from "./CommentMenu"
-import ShowUsersModal from "./ShowUsersModal"
+import Avatar from '@mui/material/Avatar'
+import Typography from '@mui/material/Typography'
+import FavoriteIcon from '@mui/icons-material/Favorite'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import IconButton from '@mui/material/IconButton'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import CommentMenu from './CommentMenu'
+import ShowUsersModal from './ShowUsersModal'
+
+import moment from 'moment'
+moment().format()
 
 type PropsType = {
   comment: CommentType
@@ -47,7 +50,7 @@ const SingleComment: React.FC<PropsType> = ({ comment }) => {
     <div className='comment-item'>
       <Link to='/'>
         <Avatar
-          style={{ height: "30px", width: "30px" }}
+          style={{ height: '30px', width: '30px' }}
           src={comment.createdBy.image}
           alt={comment.createdBy.username}
         />
@@ -55,7 +58,7 @@ const SingleComment: React.FC<PropsType> = ({ comment }) => {
       <div className='comment-item__content'>
         <Typography variant='body1'>
           <Link to='/'>
-            <span style={{ fontWeight: "bold" }}>
+            <span style={{ fontWeight: 'bold' }}>
               {comment.createdBy.username}
             </span>
           </Link>
@@ -68,7 +71,7 @@ const SingleComment: React.FC<PropsType> = ({ comment }) => {
           className='comment-item__content-meta'
         >
           <span className='comment-item__content-meta__date'>
-            {new Date(comment.createdAt).toDateString()}
+            {moment(comment.createdAt).fromNow()}
           </span>
 
           <span className='comment-item__content-meta__fav'>
@@ -91,9 +94,9 @@ const SingleComment: React.FC<PropsType> = ({ comment }) => {
         onClick={openMenu}
         aria-controls='post-menu'
         aria-haspopup='true'
-        aria-expanded={isMenuOpened ? "true" : undefined}
+        aria-expanded={isMenuOpened ? 'true' : undefined}
       >
-        <MoreVertIcon style={{ height: "20px", width: "20px" }} />
+        <MoreVertIcon style={{ height: '20px', width: '20px' }} />
       </IconButton>
       <CommentMenu
         open={isMenuOpened}

@@ -21,7 +21,10 @@ const Register = async (req, res) => {
     })
     res
       .status(201)
-      .json({ msg: "User created successfully!", user: { token, username } })
+      .json({
+        msg: "User created successfully!",
+        user: { token, username, email, image: user.image, id: user._id },
+      })
   } catch (error) {
     res.status(500).json({ msg: "Email is incorrect" })
   }

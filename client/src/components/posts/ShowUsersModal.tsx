@@ -1,15 +1,15 @@
-import React from "react"
+import React, { useEffect, useState } from 'react'
 // Types
-import { UserType } from "../../types"
+import { UserType } from '../../types'
 // MUI
-import Modal from "@mui/material/Modal"
-import Box from "@mui/material/Box"
-import Typography from "@mui/material/Typography"
-import CardHeader from "@mui/material/CardHeader"
-import Avatar from "@mui/material/Avatar"
-import Button from "@mui/material/Button"
-import IconButton from "@mui/material/IconButton"
-import CloseIcon from "@mui/icons-material/Close"
+import Modal from '@mui/material/Modal'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import CardHeader from '@mui/material/CardHeader'
+import Avatar from '@mui/material/Avatar'
+import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import CloseIcon from '@mui/icons-material/Close'
 
 type PropsType = {
   users: UserType[]
@@ -18,6 +18,13 @@ type PropsType = {
 }
 
 const ShowUsersModal: React.FC<PropsType> = ({ users, open, handleClose }) => {
+  const [usersList, setUsersList] = useState(users)
+
+  useEffect(() => {
+    console.log(users)
+    setUsersList(users)
+  }, [users])
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Box className='users-modal'>
@@ -29,11 +36,11 @@ const ShowUsersModal: React.FC<PropsType> = ({ users, open, handleClose }) => {
             <CloseIcon />
           </IconButton>
         </div>
-        {users.length > 0 ? (
+        {usersList.length > 0 ? (
           users.map((user) => (
             <CardHeader
               key={user._id}
-              style={{ padding: "0.5rem 0" }}
+              style={{ padding: '0.5rem 0' }}
               avatar={<Avatar src={user.image} alt={user.username} />}
               title={
                 <Typography variant='body1' color='black'>
@@ -42,13 +49,13 @@ const ShowUsersModal: React.FC<PropsType> = ({ users, open, handleClose }) => {
               }
               subheader={user.email}
               action={<Button variant='text'>Visit</Button>}
-              classes={{ action: "margin-auto" }}
+              classes={{ action: 'margin-auto' }}
             />
           ))
         ) : (
           <Typography
             color='GrayText'
-            style={{ textAlign: "center", marginBottom: "1rem" }}
+            style={{ textAlign: 'center', marginBottom: '1rem' }}
           >
             No likes yet!
           </Typography>

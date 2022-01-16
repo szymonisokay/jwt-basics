@@ -27,7 +27,7 @@ const Header = () => {
                 <Link to='/'>My posts</Link>
               </li>
               <li className='link-item'>
-                <Link to='/'>Add post</Link>
+                <Link to='/add-post'>Add post</Link>
               </li>
             </ul>
           </nav>

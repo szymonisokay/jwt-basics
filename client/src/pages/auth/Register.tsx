@@ -7,15 +7,17 @@ import { useAuthContext } from "../../context/AuthContext"
 import logo from "../../images/logo.png"
 import Info from "../../components/utils/Info"
 
-const Login = () => {
+const Register = () => {
+  const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [info, setInfo] = useState(false)
   const [infoType, setInfoType] = useState("")
   const [infoMsg, setInfoMsg] = useState("")
 
-  const { signIn } = useAuthContext()
+  const { signUp } = useAuthContext()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: any) => {
@@ -25,7 +27,7 @@ const Login = () => {
     setLoading(true)
     setInfo(false)
 
-    const response = await signIn(email, password)
+    const response = await signUp(username, email, password, confirmPassword)
 
     setLoading(false)
 
@@ -54,10 +56,19 @@ const Login = () => {
               color='GrayText'
               sx={{ marginTop: "1rem" }}
             >
-              Sign in to your account
+              Create an account
             </Typography>
           </div>
           <div className='card-content'>
+            <TextField
+              id='username'
+              label='Username'
+              variant='standard'
+              color='secondary'
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              sx={{ marginBottom: "1rem" }}
+            />
             <TextField
               id='email'
               label='Email'
@@ -75,6 +86,16 @@ const Login = () => {
               color='secondary'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              sx={{ marginBottom: "1rem" }}
+            />
+            <TextField
+              id='confirm-password'
+              label='Confirm password'
+              type='password'
+              variant='standard'
+              color='secondary'
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
           <div className='card-actions'>
@@ -87,7 +108,7 @@ const Login = () => {
                 ":hover": { background: "#292f44" },
               }}
             >
-              {loading ? "Loading" : "Sign In"}
+              {loading ? "Loading" : "Sign Up"}
             </Button>
           </div>
           {info && <Info msg={infoMsg} type={infoType} />}
@@ -98,11 +119,11 @@ const Login = () => {
         variant='body2'
         sx={{ textAlign: "center", marginTop: "1rem" }}
       >
-        Don't have an account?&nbsp;
-        <Link to='/sign-up'>Sign Up</Link>
+        Already have an account?&nbsp;
+        <Link to='/sign-in'>Sign In</Link>
       </Typography>
     </div>
   )
 }
 
-export default Login
+export default Register
