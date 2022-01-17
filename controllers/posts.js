@@ -101,25 +101,32 @@ const updatePost = async (req, res) => {
       { _id: postID },
       { ...req.body },
       {
-        returnOriginal: false,
+        new: true,
       }
-    )
-      .populate({ path: 'createdBy', select: 'username image email' })
-      .populate({
-        path: 'comments',
-        populate: { path: 'createdBy', select: 'username image email' },
-      })
-      .populate({ path: 'likes', select: 'username image email' })
+    ).populate({
+      path: 'likes',
+      select: '-image',
+    })
 
     if (req.body.liked) {
       if (!post.likes.some((like) => like._id.toString() === req.user)) {
         post.likes.push(req.user)
+
+        post.populate({ path: 'createdBy', select: 'username image email' })
+        post.populate({
+          path: 'comments',
+          populate: { path: 'createdBy', select: 'username image email' },
+          populate: { path: 'likes', select: 'username image email' },
+        })
+        post.populate('likes')
         post.save()
+
+        console.log(post)
 
         return res.status(200).json({ msg: 'Post liked', post })
       } else {
-        const removeLike = post.likes.filter((_id) => {
-          _id.toString() !== req.user
+        const removeLike = post.likes.filter((like) => {
+          like._id.toString() !== req.user
         })
 
         post.likes = removeLike
