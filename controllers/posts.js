@@ -97,48 +97,45 @@ const updatePost = async (req, res) => {
   try {
     const { id: postID } = req.params
 
-    const post = await Post.findOneAndUpdate(
-      { _id: postID },
-      { ...req.body },
-      {
-        new: true,
-      }
-    ).populate({
-      path: 'likes',
-      select: '-image',
-    })
+    if (!req.body.liked) {
+      const post = await Post.findByIdAndUpdate(
+        postID,
+        { ...req.body },
+        { new: true }
+      )
 
-    if (req.body.liked) {
-      if (!post.likes.some((like) => like._id.toString() === req.user)) {
-        post.likes.push(req.user)
-
-        post.populate({ path: 'createdBy', select: 'username image email' })
-        post.populate({
-          path: 'comments',
-          populate: { path: 'createdBy', select: 'username image email' },
-          populate: { path: 'likes', select: 'username image email' },
-        })
-        post.populate('likes')
-        post.save()
-
-        console.log(post)
-
-        return res.status(200).json({ msg: 'Post liked', post })
-      } else {
-        const removeLike = post.likes.filter((like) => {
-          like._id.toString() !== req.user
-        })
-
-        post.likes = removeLike
-        post.save()
-
-        return res.status(200).json({ msg: 'Post disliked', post })
-      }
+      return res.status(200).json({ msg: 'Post updated', data: post })
     }
 
-    if (!post) return res.status(404).json({ msg: 'Post not found' })
+    const post = await Post.findById(postID)
+      .populate({ path: 'createdBy', select: 'username image email' })
+      .populate({
+        path: 'comments',
+        select: '-__v',
+        populate: { path: 'likes', select: 'username image email' },
+      })
+      .populate({
+        path: 'comments',
+        select: '-__v',
+        populate: { path: 'createdBy', select: 'username image email' },
+      })
+      .exec()
 
-    res.status(200).json({ msg: 'Post updated', data: post })
+    if (post.likes.some((like) => like._id.toString() === req.user)) {
+      const filteredLikes = post.likes.filter(
+        (like) => like._id.toString() !== req.user
+      )
+
+      post.likes = filteredLikes
+    } else {
+      post.likes.push(req.user)
+    }
+
+    post.populate({ path: 'likes', select: 'username image email' })
+
+    await post.save()
+
+    res.status(200).json({ msg: 'Post liked', post })
   } catch (error) {
     res.status(500).json({ msg: 'Something went wrong' })
   }
